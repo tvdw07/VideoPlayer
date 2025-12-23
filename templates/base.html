@@ -11,7 +11,37 @@
 </head>
 <body class="bg-dark text-light">
 <div class="container py-4">
+
+  {# Flash-Messages anzeigen #}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="mb-3">
+        {% for category, msg in messages %}
+          <div class="alert alert-{{ 'danger' if category == 'danger' else ('success' if category == 'success' else 'info') }}" role="alert">
+            {{ msg }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
   {% block content %}{% endblock %}
 </div>
+
+<script>
+// Flash-Messages automatisch nach 3s ausblenden und entfernen (sanfter Fade-out)
+document.addEventListener('DOMContentLoaded', function() {
+  const alerts = document.querySelectorAll('.alert');
+  if (!alerts.length) return;
+
+  setTimeout(() => {
+    alerts.forEach(a => {
+      a.style.transition = 'opacity 0.5s ease';
+      a.style.opacity = '0';
+      setTimeout(() => a.remove(), 500);
+    });
+  }, 3000);
+});
+</script>
 </body>
 </html>

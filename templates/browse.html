@@ -12,14 +12,24 @@
   {% endif %}
 
   {% for item in items %}
-    <li class="list-group-item">
-      {% if item.is_dir %}
-        📁 <a href="/browse/{{ item.path }}">{{ item.name }}</a>
-      {% elif item.is_video %}
-        ▶️ <a href="/watch/{{ item.path }}">{{ item.name }}</a>
-      {% else %}
-        📄 {{ item.name }}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        {% if item.is_dir %}
+          📁 <a href="/browse/{{ item.path }}">{{ item.name }}</a>
+        {% elif item.is_video %}
+          ▶️ <a href="/watch/{{ item.path }}">{{ item.name }}</a>
+        {% else %}
+          📄 {{ item.name }}
+        {% endif %}
+      </div>
+
+      {% if item.is_video %}
+        <form method="post" action="{{ url_for('delete_video') }}" onsubmit="return confirm('Video löschen? Dies kann nicht rückgängig gemacht werden.');">
+          <input type="hidden" name="video_path" value="{{ item.path }}">
+          <button class="btn btn-sm btn-outline-danger">Löschen</button>
+        </form>
       {% endif %}
+
     </li>
   {% endfor %}
 

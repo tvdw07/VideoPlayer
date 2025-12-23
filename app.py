@@ -1,7 +1,8 @@
-from flask import Flask, render_template, send_from_directory, abort
+from flask import Flask, render_template, send_from_directory, abort, request, redirect, url_for, flash
 from pathlib import Path
 
 app = Flask(__name__)
+app.secret_key = "dev-change-this"
 
 BASE_DIR = Path(__file__).parent
 MEDIA_ROOT = BASE_DIR / "media"
@@ -84,6 +85,43 @@ def watch(rel_path):
         next_video=next_ep,
         breadcrumbs=breadcrumbs
     )
+
+
+# Neue Route: Datei löschen (sicher, nur per POST)
+@app.route('/delete', methods=['POST'])
+def delete_video():
+    rel_path = request.form.get('video_path')
+    if not rel_path:
+        abort(400)
+
+    # sichere Auflösung des Pfads
+    path = safe_path(rel_path)
+
+    # Prüfungen
+    if not path.exists() or not path.is_file():
+        flash('Datei nicht gefunden', 'danger')
+        parent = str(Path(rel_path).parent)
+        if parent == '.':
+            parent = ''
+        return redirect(url_for('browse', rel_path=parent))
+
+    if path.suffix.lower() not in VIDEO_EXTENSIONS:
+        abort(400)
+
+    try:
+        path.unlink()
+        flash('Datei gelöscht', 'success')
+    except PermissionError:
+        flash('Keine Berechtigung zum Löschen der Datei', 'danger')
+    except FileNotFoundError:
+        flash('Datei nicht gefunden', 'danger')
+    except Exception as e:
+        flash('Fehler beim Löschen der Datei', 'danger')
+
+    parent = str(path.parent.relative_to(MEDIA_ROOT))
+    if parent == '.':
+        parent = ''
+    return redirect(url_for('browse', rel_path=parent))
 
 
 
