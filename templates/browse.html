@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h4>📁 {{ current or "media" }}</h4>
+
+<ul class="list-group">
+
+  {% if parent %}
+  <li class="list-group-item">
+    <a href="/browse/{{ parent }}">⬅️ Zurück</a>
+  </li>
+  {% endif %}
+
+  {% for item in items %}
+    <li class="list-group-item">
+      {% if item.is_dir %}
+        📁 <a href="/browse/{{ item.path }}">{{ item.name }}</a>
+      {% elif item.is_video %}
+        ▶️ <a href="/watch/{{ item.path }}">{{ item.name }}</a>
+      {% else %}
+        📄 {{ item.name }}
+      {% endif %}
+    </li>
+  {% endfor %}
+
+</ul>
+
+{% endblock %}
