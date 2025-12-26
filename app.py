@@ -1,12 +1,26 @@
-from flask import Flask, render_template, send_from_directory, abort, request, redirect, url_for, flash, Blueprint
+from flask import Flask, render_template, send_from_directory, abort, redirect, url_for, flash, Blueprint
+from flask_wtf import FlaskForm
+from flask_wtf.csrf import CSRFProtect
+from wtforms import HiddenField, SubmitField
+from wtforms.validators import DataRequired
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
 MEDIA_ROOT = BASE_DIR / "media"
 
+csrf = CSRFProtect()
 main_bp = Blueprint("main", __name__)
 
 VIDEO_EXTENSIONS = {".mp4"}
+
+
+class DeleteVideoForm(FlaskForm):
+    """Form für sicheres Löschen von Videos mit CSRF-Protection."""
+    video_path = HiddenField(validators=[DataRequired()])
+    submit = SubmitField("Löschen")
+
+
+# ...existing code...
 
 
 def safe_path(rel_path=""):
@@ -80,6 +94,14 @@ def browse(rel_path=""):
     items = list_dir(rel_path)
     parent = get_parent_path(rel_path)
     breadcrumbs = get_breadcrumbs(rel_path)
+
+    # Für jedes Video ein eigenes Formular mit eigenem CSRF-Token erstellen
+    for item in items:
+        if item.get('is_video'):
+            form = DeleteVideoForm()
+            form.video_path.data = item['path']
+            item['form'] = form
+
     return render_template("browse.html",
                            items=items,
                            current=rel_path,
@@ -109,7 +131,13 @@ def watch(rel_path):
 # Neue Route: Datei löschen (sicher, nur per POST)
 @main_bp.route('/delete', methods=['POST'])
 def delete_video():
-    rel_path = request.form.get('video_path')
+    form = DeleteVideoForm()
+
+    if not form.validate_on_submit():
+        flash('Ungültiges Formular oder abgelaufener Token', 'danger')
+        return redirect(url_for('main.browse'))
+
+    rel_path = form.video_path.data
     if not rel_path:
         abort(400)
 
@@ -178,6 +206,7 @@ def create_app(config: dict | None = None):
     app.secret_key = "dev-change-this"
     if config:
         app.config.update(config)
+    csrf.init_app(app)
     app.register_blueprint(main_bp)
     return app
 
