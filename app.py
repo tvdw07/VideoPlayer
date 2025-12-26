@@ -19,20 +19,33 @@ def safe_path(rel_path=""):
 
 
 
-def list_dir(rel_path=""):
+def list_dir(rel_path: str = ""):
     path = safe_path(rel_path)
     if not path.exists() or not path.is_dir():
         abort(404)
 
-    items = []
-    for p in sorted(path.iterdir()):
-        items.append({
+    dirs = []
+    files = []
+
+    for p in path.iterdir():
+        entry = {
             "name": p.name,
             "is_dir": p.is_dir(),
-            "is_video": p.suffix.lower() in VIDEO_EXTENSIONS,
+            "is_video": p.is_file() and p.suffix.lower() in VIDEO_EXTENSIONS,
             "path": str(Path(rel_path) / p.name)
-        })
-    return items
+        }
+
+        if p.is_dir():
+            dirs.append(entry)
+        elif p.is_file():
+            files.append(entry)
+
+    # Ordner zuerst, dann Dateien – jeweils sortiert
+    dirs.sort(key=lambda x: x["name"].lower())
+    files.sort(key=lambda x: x["name"].lower())
+
+    return dirs + files
+
 
 
 def next_video(rel_path):
