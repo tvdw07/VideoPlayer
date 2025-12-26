@@ -24,7 +24,7 @@
       </div>
 
       {% if item.is_video %}
-        <form method="post" action="{{ url_for('delete_video') }}" onsubmit="return confirm('Video löschen? Dies kann nicht rückgängig gemacht werden.');">
+        <form method="post" action="{{ url_for('main.delete_video') }}" onsubmit="return confirm('Video löschen? Dies kann nicht rückgängig gemacht werden.');">
           <input type="hidden" name="video_path" value="{{ item.path }}">
           <button class="btn btn-sm btn-outline-danger">Löschen</button>
         </form>

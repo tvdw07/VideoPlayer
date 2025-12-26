@@ -1,12 +1,10 @@
-from flask import Flask, render_template, send_from_directory, abort, request, redirect, url_for, flash
+from flask import Flask, render_template, send_from_directory, abort, request, redirect, url_for, flash, Blueprint
 from pathlib import Path
-
-app = Flask(__name__)
-app.secret_key = "dev-change-this"
 
 BASE_DIR = Path(__file__).parent
 MEDIA_ROOT = BASE_DIR / "media"
 
+main_bp = Blueprint("main", __name__)
 
 VIDEO_EXTENSIONS = {".mp4"}
 
@@ -52,9 +50,9 @@ def get_breadcrumbs(rel_path):
     return parts
 
 
-@app.route("/")
-@app.route("/browse/")
-@app.route("/browse/<path:rel_path>")
+@main_bp.route("/")
+@main_bp.route("/browse/")
+@main_bp.route("/browse/<path:rel_path>")
 def browse(rel_path=""):
     items = list_dir(rel_path)
     parent = str(Path(rel_path).parent) if rel_path else None
@@ -66,7 +64,7 @@ def browse(rel_path=""):
                            breadcrumbs=breadcrumbs)
 
 
-@app.route("/watch/<path:rel_path>")
+@main_bp.route("/watch/<path:rel_path>")
 def watch(rel_path):
     next_ep = next_video(rel_path)
 
@@ -88,7 +86,7 @@ def watch(rel_path):
 
 
 # Neue Route: Datei löschen (sicher, nur per POST)
-@app.route('/delete', methods=['POST'])
+@main_bp.route('/delete', methods=['POST'])
 def delete_video():
     rel_path = request.form.get('video_path')
     if not rel_path:
@@ -103,7 +101,7 @@ def delete_video():
         parent = str(Path(rel_path).parent)
         if parent == '.':
             parent = ''
-        return redirect(url_for('browse', rel_path=parent))
+        return redirect(url_for('main.browse', rel_path=parent))
 
     if path.suffix.lower() not in VIDEO_EXTENSIONS:
         abort(400)
@@ -121,7 +119,7 @@ def delete_video():
     parent = str(path.parent.relative_to(MEDIA_ROOT))
     if parent == '.':
         parent = ''
-    return redirect(url_for('browse', rel_path=parent))
+    return redirect(url_for('main.browse', rel_path=parent))
 
 
 def calculate_media_size():
@@ -140,13 +138,13 @@ def format_size(num_bytes: int) -> str:
         size /= step
 
 
-@app.route("/media/<path:rel_path>")
+@main_bp.route("/media/<path:rel_path>")
 def media(rel_path):
     path = safe_path(rel_path)
     return send_from_directory(path.parent, path.name)
 
 
-@app.route("/settings")
+@main_bp.route("/settings")
 def settings():
     total_bytes = calculate_media_size()
     return render_template(
@@ -156,8 +154,17 @@ def settings():
     )
 
 
+def create_app(config: dict | None = None):
+    app = Flask(__name__)
+    app.secret_key = "dev-change-this"
+    if config:
+        app.config.update(config)
+    app.register_blueprint(main_bp)
+    return app
+
+
 def start(host="127.0.0.1", port=8000, debug=False):
-    app.run(host=host, port=port, debug=debug)
+    create_app().run(host=host, port=port, debug=debug)
 
 if __name__ == "__main__":
-    start(host="0.0.0.0", port=8000, debug=True)
+    create_app().run(host="0.0.0.0", port=8000, debug=True)
