@@ -1,4 +1,4 @@
-from flask import Flask, render_template, send_from_directory, abort, redirect, url_for, flash, Blueprint
+from flask import Flask, render_template, send_from_directory, abort, redirect, url_for, flash, Blueprint, send_file
 from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect
 from wtforms import HiddenField, SubmitField
@@ -188,7 +188,8 @@ def format_size(num_bytes: int) -> str:
 @main_bp.route("/media/<path:rel_path>")
 def media(rel_path):
     path = safe_path(rel_path)
-    return send_from_directory(path.parent, path.name)
+    return send_file(path, conditional=True)
+
 
 
 @main_bp.route("/settings")
