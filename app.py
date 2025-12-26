@@ -1,9 +1,11 @@
-from flask import Flask, render_template, send_from_directory, abort, redirect, url_for, flash, Blueprint, send_file
+from flask import Flask, render_template, abort, redirect, url_for, flash, Blueprint, send_file
 from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect
 from wtforms import HiddenField, SubmitField
 from wtforms.validators import DataRequired
 from pathlib import Path
+import logging
+import logging.handlers
 
 BASE_DIR = Path(__file__).parent
 MEDIA_ROOT = BASE_DIR / "media"
@@ -12,6 +14,53 @@ csrf = CSRFProtect()
 main_bp = Blueprint("main", __name__)
 
 VIDEO_EXTENSIONS = {".mp4"}
+
+
+def setup_logging(log_file=None, log_level=logging.INFO):
+    """
+    Konfiguriere ein strukturiertes Logging-System.
+
+    Args:
+        log_file: Pfad zur Log-Datei (optional). Wenn None, nur Console-Logging.
+        log_level: Logging-Level (default: INFO)
+    """
+    logger = logging.getLogger("videoplayer")
+    logger.setLevel(log_level)
+
+    # Verhindere doppeltes Logging bei mehrfachem Aufruf
+    if logger.hasHandlers():
+        return logger
+
+    # Format für Log-Meldungen
+    formatter = logging.Formatter(
+        fmt="[%(asctime)s] %(levelname)-8s [%(name)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S"
+    )
+
+    # Console Handler (Standard Output)
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(log_level)
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
+
+    # File Handler (nur wenn log_file angegeben)
+    if log_file:
+        log_dir = Path(log_file).parent
+        log_dir.mkdir(parents=True, exist_ok=True)
+        file_handler = logging.handlers.RotatingFileHandler(
+            filename=log_file,
+            maxBytes=10 * 1024 * 1024,  # 10 MB
+            backupCount=5  # Behalte 5 alte Log-Dateien
+        )
+        file_handler.setLevel(log_level)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+
+    return logger
+
+
+# Initialisiere Logger (Console nur, kein Log-File)
+logger = setup_logging()
 
 
 class DeleteVideoForm(FlaskForm):
@@ -91,41 +140,53 @@ def get_parent_path(rel_path: str) -> str:
 @main_bp.route("/browse/")
 @main_bp.route("/browse/<path:rel_path>")
 def browse(rel_path=""):
-    items = list_dir(rel_path)
-    parent = get_parent_path(rel_path)
-    breadcrumbs = get_breadcrumbs(rel_path)
+    logger.debug(f"Browse request for path: {rel_path or 'root'}")
+    try:
+        items = list_dir(rel_path)
+        parent = get_parent_path(rel_path)
+        breadcrumbs = get_breadcrumbs(rel_path)
 
-    # Für jedes Video ein eigenes Formular mit eigenem CSRF-Token erstellen
-    for item in items:
-        if item.get('is_video'):
-            form = DeleteVideoForm()
-            form.video_path.data = item['path']
-            item['form'] = form
+        # Für jedes Video ein eigenes Formular mit eigenem CSRF-Token erstellen
+        for item in items:
+            if item.get('is_video'):
+                form = DeleteVideoForm()
+                form.video_path.data = item['path']
+                item['form'] = form
 
-    return render_template("browse.html",
-                           items=items,
-                           current=rel_path,
-                           parent=parent,
-                           breadcrumbs=breadcrumbs)
+        logger.debug(f"Listed {len(items)} items in {rel_path or 'root'}")
+        return render_template("browse.html",
+                               items=items,
+                               current=rel_path,
+                               parent=parent,
+                               breadcrumbs=breadcrumbs)
+    except Exception as e:
+        logger.error(f"Error in browse for path '{rel_path}': {str(e)}", exc_info=True)
+        raise
 
 
 @main_bp.route("/watch/<path:rel_path>")
 def watch(rel_path):
-    next_ep = next_video(rel_path)
+    logger.debug(f"Watch request for video: {rel_path}")
+    try:
+        next_ep = next_video(rel_path)
 
-    parent = get_parent_path(rel_path)
+        parent = get_parent_path(rel_path)
 
-    filename = Path(rel_path).name
-    breadcrumbs = get_breadcrumbs(parent)
+        filename = Path(rel_path).name
+        breadcrumbs = get_breadcrumbs(parent)
 
-    return render_template(
-        "watch.html",
-        video=rel_path,
-        filename=filename,
-        parent=parent,
-        next_video=next_ep,
-        breadcrumbs=breadcrumbs
-    )
+        logger.debug(f"Playing video: {filename}")
+        return render_template(
+            "watch.html",
+            video=rel_path,
+            filename=filename,
+            parent=parent,
+            next_video=next_ep,
+            breadcrumbs=breadcrumbs
+        )
+    except Exception as e:
+        logger.error(f"Error in watch for video '{rel_path}': {str(e)}", exc_info=True)
+        raise
 
 
 # Neue Route: Datei löschen (sicher, nur per POST)
@@ -134,11 +195,13 @@ def delete_video():
     form = DeleteVideoForm()
 
     if not form.validate_on_submit():
+        logger.warning("Delete attempt with invalid CSRF token or form data")
         flash('Ungültiges Formular oder abgelaufener Token', 'danger')
         return redirect(url_for('main.browse'))
 
     rel_path = form.video_path.data
     if not rel_path:
+        logger.warning("Delete attempt with empty video_path")
         abort(400)
 
     # sichere Auflösung des Pfads
@@ -146,21 +209,28 @@ def delete_video():
 
     # Prüfungen
     if not path.exists() or not path.is_file():
+        logger.warning(f"Delete attempt for non-existent file: {rel_path}")
         flash('Datei nicht gefunden', 'danger')
         parent = get_parent_path(rel_path)
         return redirect(url_for('main.browse', rel_path=parent))
 
     if path.suffix.lower() not in VIDEO_EXTENSIONS:
+        logger.warning(f"Delete attempt for non-video file: {rel_path}")
         abort(400)
 
     try:
+        logger.info(f"Deleting video: {rel_path}")
         path.unlink()
+        logger.info(f"Successfully deleted: {rel_path}")
         flash('Datei gelöscht', 'success')
     except PermissionError:
+        logger.error(f"Permission denied when deleting: {rel_path}")
         flash('Keine Berechtigung zum Löschen der Datei', 'danger')
     except FileNotFoundError:
+        logger.error(f"File not found during deletion: {rel_path}")
         flash('Datei nicht gefunden', 'danger')
     except Exception as e:
+        logger.error(f"Error deleting file '{rel_path}': {str(e)}", exc_info=True)
         flash('Fehler beim Löschen der Datei', 'danger')
 
     parent = str(path.parent.relative_to(MEDIA_ROOT))
@@ -187,8 +257,14 @@ def format_size(num_bytes: int) -> str:
 
 @main_bp.route("/media/<path:rel_path>")
 def media(rel_path):
-    path = safe_path(rel_path)
-    return send_file(path, conditional=True)
+    logger.debug(f"Media file request: {rel_path}")
+    try:
+        path = safe_path(rel_path)
+        logger.info(f"Serving media file: {rel_path}")
+        return send_file(path, conditional=True)
+    except Exception as e:
+        logger.error(f"Error serving media file '{rel_path}': {str(e)}", exc_info=True)
+        raise
 
 
 
@@ -209,11 +285,17 @@ def create_app(config: dict | None = None):
         app.config.update(config)
     csrf.init_app(app)
     app.register_blueprint(main_bp)
+
+    logger.info("Flask application created and configured")
+    logger.debug(f"Media root: {MEDIA_ROOT}")
+
     return app
 
 
 def start(host="127.0.0.1", port=8000, debug=False):
+    logger.info(f"Starting application on {host}:{port} (debug={debug})")
     create_app().run(host=host, port=port, debug=debug)
 
 if __name__ == "__main__":
+    logger.info("Application startup initiated")
     create_app().run(host="0.0.0.0", port=8000, debug=True)
