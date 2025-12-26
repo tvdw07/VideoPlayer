@@ -34,7 +34,7 @@ def setup_logging(log_file=None, log_level=logging.INFO):
     # Format für Log-Meldungen
     formatter = logging.Formatter(
         fmt="[%(asctime)s] %(levelname)-8s [%(name)s] %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
+        datefmt="%d-%m-%Y %H:%M:%S"
     )
 
     # Console Handler (Standard Output)
