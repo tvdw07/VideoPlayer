@@ -61,9 +61,11 @@ def next_video(rel_path):
 
     return None
 
-def get_breadcrumbs(rel_path):
-    parts = rel_path.split("/") if rel_path else []
-    return parts
+def get_breadcrumbs(rel_path: str):
+    if not rel_path:
+        return []
+    return list(Path(rel_path).parts)
+
 
 
 @main_bp.route("/")
