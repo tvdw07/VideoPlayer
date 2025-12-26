@@ -10,10 +10,13 @@ VIDEO_EXTENSIONS = {".mp4"}
 
 
 def safe_path(rel_path=""):
-    path = (MEDIA_ROOT / rel_path).resolve()
-    if not str(path).startswith(str(MEDIA_ROOT.resolve())):
+    try:
+        path = (MEDIA_ROOT / rel_path).resolve()
+        path.relative_to(MEDIA_ROOT.resolve())
+        return path
+    except ValueError:
         abort(403)
-    return path
+
 
 
 def list_dir(rel_path=""):
