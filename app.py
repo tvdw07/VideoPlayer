@@ -66,6 +66,11 @@ def get_breadcrumbs(rel_path: str):
         return []
     return list(Path(rel_path).parts)
 
+def get_parent_path(rel_path: str) -> str:
+    parent = Path(rel_path).parent
+    return "" if parent == Path(".") else str(parent)
+
+
 
 
 @main_bp.route("/")
@@ -73,7 +78,7 @@ def get_breadcrumbs(rel_path: str):
 @main_bp.route("/browse/<path:rel_path>")
 def browse(rel_path=""):
     items = list_dir(rel_path)
-    parent = str(Path(rel_path).parent) if rel_path else None
+    parent = get_parent_path(rel_path)
     breadcrumbs = get_breadcrumbs(rel_path)
     return render_template("browse.html",
                            items=items,
@@ -86,9 +91,7 @@ def browse(rel_path=""):
 def watch(rel_path):
     next_ep = next_video(rel_path)
 
-    parent = str(Path(rel_path).parent)
-    if parent == ".":
-        parent = ""
+    parent = get_parent_path(rel_path)
 
     filename = Path(rel_path).name
     breadcrumbs = get_breadcrumbs(parent)
@@ -116,9 +119,7 @@ def delete_video():
     # Prüfungen
     if not path.exists() or not path.is_file():
         flash('Datei nicht gefunden', 'danger')
-        parent = str(Path(rel_path).parent)
-        if parent == '.':
-            parent = ''
+        parent = get_parent_path(rel_path)
         return redirect(url_for('main.browse', rel_path=parent))
 
     if path.suffix.lower() not in VIDEO_EXTENSIONS:
