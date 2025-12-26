@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container py-4">
+
+  <!-- Header -->
+  <div class="d-flex align-items-center mb-4">
+    <span class="fs-3 me-2">⚙️</span>
+    <h4 class="mb-0 fw-semibold">Einstellungen</h4>
+  </div>
+
+  <!-- Storage Card -->
+  <div class="card shadow-sm border-0 bg-dark bg-opacity-75">
+    <div class="card-body">
+
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h6 class="text-uppercase text-light mb-1 small">
+            Gesamter Speicherverbrauch
+          </h6>
+          <div class="display-6 fw-bold text-light">
+            {{ total_formatted }}
+          </div>
+        </div>
+      </div>
+
+      <hr class="border-secondary my-3">
+
+      <p class="text-secondary mb-0 small">
+        Entspricht exakt {{ total_bytes }} Bytes
+      </p>
+    </div>
+  </div>
+
+  <!-- Back Button -->
+  <div class="mt-4">
+    <a href="/browse/" class="btn btn-outline-light px-4">
+      ← Zurück zur Übersicht
+    </a>
+  </div>
+
+</div>
+
+{% endblock %}

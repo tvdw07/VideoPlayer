@@ -124,6 +124,21 @@ def delete_video():
     return redirect(url_for('browse', rel_path=parent))
 
 
+def calculate_media_size():
+    """Return total size in bytes of all files under MEDIA_ROOT."""
+    return sum(p.stat().st_size for p in MEDIA_ROOT.rglob('*') if p.is_file())
+
+
+def format_size(num_bytes: int) -> str:
+    """Human readable size, base 1024."""
+    step = 1024
+    units = ["B", "KB", "MB", "GB", "TB"]
+    size = float(num_bytes)
+    for unit in units:
+        if size < step or unit == units[-1]:
+            return f"{size:.2f} {unit}"
+        size /= step
+
 
 @app.route("/media/<path:rel_path>")
 def media(rel_path):
@@ -131,5 +146,18 @@ def media(rel_path):
     return send_from_directory(path.parent, path.name)
 
 
+@app.route("/settings")
+def settings():
+    total_bytes = calculate_media_size()
+    return render_template(
+        "settings.html",
+        total_bytes=total_bytes,
+        total_formatted=format_size(total_bytes),
+    )
+
+
+def start(host="127.0.0.1", port=8000, debug=False):
+    app.run(host=host, port=port, debug=debug)
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000, debug=True)
+    start(host="0.0.0.0", port=8000, debug=True)

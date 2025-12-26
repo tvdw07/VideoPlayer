@@ -11,6 +11,12 @@
 </head>
 <body class="bg-dark text-light">
 <div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <a href="{{ url_for('browse') }}" class="text-light fw-bold h5 mb-0">Local Media</a>
+    <div class="d-flex gap-2">
+      <a class="btn btn-sm btn-outline-info" href="{{ url_for('settings') }}">Settings</a>
+    </div>
+  </div>
 
   {# Flash-Messages anzeigen #}
   {% with messages = get_flashed_messages(with_categories=true) %}
