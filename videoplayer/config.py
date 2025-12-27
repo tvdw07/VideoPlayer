@@ -48,3 +48,5 @@ class Config:
     DEBUG = _env_bool("DEBUG", False)
 
     RATE_LIMIT_ENABLED = _env_bool("RATE_LIMIT_ENABLED", True)
+
+    CLEANUP_EMPTY_DIRECTORIES = _env_bool("CLEANUP_EMPTY_DIRECTORIES", False)

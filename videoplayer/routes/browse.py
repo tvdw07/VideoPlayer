@@ -7,9 +7,9 @@ from ..utils import (
     list_dir,
     get_parent_path,
     get_breadcrumbs,
-    safe_path,
+    safe_path, cleanup_empty_directories,
 )
-from ..config import MEDIA_ROOT, VIDEO_EXTENSIONS
+from ..config import MEDIA_ROOT, VIDEO_EXTENSIONS, Config
 from ..logging import setup_logging
 
 logger = setup_logging()
@@ -88,4 +88,18 @@ def delete_video():
     parent = str(path.parent.relative_to(MEDIA_ROOT))
     if parent == ".":
         parent = ""
+
+    if Config.CLEANUP_EMPTY_DIRECTORIES:
+        # Get parent before cleanup in case it gets deleted
+        cleanup_parent = path.parent
+        removed = cleanup_empty_directories(cleanup_parent)
+        if removed:
+            logger.info("Cleanup removed %d empty directories", removed)
+            # Recalculate parent if it was deleted
+            if not cleanup_parent.exists():
+                parent = str(cleanup_parent.parent.relative_to(MEDIA_ROOT))
+                if parent == ".":
+                    parent = ""
+
     return redirect(url_for("browse.browse", rel_path=parent))
+

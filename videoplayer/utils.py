@@ -78,3 +78,34 @@ def format_size(num_bytes: int) -> str:
         size /= step
     # Fallback; should not be reached
     return f"{size:.2f} {units[-1]}"
+
+def cleanup_empty_directories(
+    start_path: Path,
+    stop_at: Path = MEDIA_ROOT,
+) -> int:
+    """
+    Entfernt rekursiv leere Verzeichnisse von start_path nach oben.
+
+    Returns:
+        Anzahl der gelöschten Verzeichnisse
+    """
+    deleted = 0
+    current = start_path
+
+    while current != stop_at:
+        if not current.exists() or not current.is_dir():
+            break
+
+        try:
+            # leer?
+            if any(current.iterdir()):
+                break
+
+            current.rmdir()
+            deleted += 1
+        except OSError:
+            break
+
+        current = current.parent
+
+    return deleted
