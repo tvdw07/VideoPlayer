@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import werkzeug
 from flask import Blueprint, send_file
 
 from .. import limiter
