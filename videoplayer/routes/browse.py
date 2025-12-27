@@ -24,7 +24,6 @@ browse_bp = Blueprint("browse", __name__)
 @browse_bp.route("/browse/<path:rel_path>")
 @limiter.limit("30 per minute")
 def browse(rel_path: str = ""):
-    rel_path = werkzeug.utils.secure_filename(rel_path)
     logger.debug(f"Browse request for path: {rel_path or 'root'}")
     items = list_dir(rel_path)
     parent = get_parent_path(rel_path)
