@@ -1,7 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
 
-import werkzeug
 from flask import abort
 from .config import Config
 
