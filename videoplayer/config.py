@@ -1,7 +1,9 @@
 from __future__ import annotations
 from pathlib import Path
 import os
+from videoplayer import setup_logging
 
+logger = setup_logging()
 # .env laden
 try:
     from dotenv import load_dotenv
@@ -18,8 +20,14 @@ BASE_DIR: Path = Path(__file__).resolve().parent.parent
 # Medienstamm: per ENV MEDIA_ROOT überschreibbar, sonst <project>/media
 MEDIA_ROOT: Path = Path(os.getenv("MEDIA_ROOT", str(BASE_DIR / "media"))).resolve()
 
+if not MEDIA_ROOT.exists():
+    logger.warn("MEDIA_ROOT does not exist")
+    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+    logger.debug("Created MEDIA_ROOT")
+
 # Unterstützte Video-Erweiterungen
 VIDEO_EXTENSIONS: set[str] = {".mp4"}
+logger.info("Using video extensions: " + ", ".join(VIDEO_EXTENSIONS))
 
 
 def _env_bool(name: str, default: bool = False) -> bool:
