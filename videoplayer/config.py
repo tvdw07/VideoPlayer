@@ -1,7 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 import os
-from videoplayer import setup_logging
+from videoplayer.logging import setup_logging
 
 logger = setup_logging()
 # .env laden
@@ -13,21 +13,6 @@ try:
 except Exception:
     # Falls dotenv nicht installiert ist, läuft die App trotzdem mit OS-ENV/Defaults
     pass
-
-# Projektbasis: Ordner über dem Paket
-BASE_DIR: Path = Path(__file__).resolve().parent.parent
-
-# Medienstamm: per ENV MEDIA_ROOT überschreibbar, sonst <project>/media
-MEDIA_ROOT: Path = Path(os.getenv("MEDIA_ROOT", str(BASE_DIR / "media"))).resolve()
-
-if not MEDIA_ROOT.exists():
-    logger.warn("MEDIA_ROOT does not exist")
-    MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
-    logger.debug("Created MEDIA_ROOT")
-
-# Unterstützte Video-Erweiterungen
-VIDEO_EXTENSIONS: set[str] = {".mp4"}
-logger.info("Using video extensions: " + ", ".join(VIDEO_EXTENSIONS))
 
 
 def _env_bool(name: str, default: bool = False) -> bool:
@@ -47,14 +32,31 @@ class Config:
     if not SECRET_KEY:
         raise ValueError("SECRET_KEY is not set in environment variables")
 
+    # Projektbasis: Ordner über dem Paket
+    BASE_DIR: Path = Path(__file__).resolve().parent.parent
+    logger.info(f"BASE_DIR: {BASE_DIR}")
+
+    # Medienstamm: per ENV MEDIA_ROOT überschreibbar, sonst <project>/media
+    MEDIA_ROOT: Path = Path(os.getenv("MEDIA_ROOT", str(BASE_DIR / "media"))).resolve()
+    logger.info(f"MEDIA_ROOT: {MEDIA_ROOT}")
+
+    if not MEDIA_ROOT.exists():
+        logger.warn("MEDIA_ROOT does not exist")
+        MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+        logger.debug("Created MEDIA_ROOT")
+
+    # Unterstützte Video-Erweiterungen
+    VIDEO_EXTENSIONS: set[str] = {".mp4"}
+    logger.info(f"Supported video extensions: {VIDEO_EXTENSIONS}")
+
     WTF_CSRF_TIME_LIMIT = None
-
-    MEDIA_ROOT = MEDIA_ROOT
-
-    VIDEO_EXTENSIONS = VIDEO_EXTENSIONS
+    logger.info(f"CSRF token time limit is set to: {WTF_CSRF_TIME_LIMIT}")
 
     DEBUG = _env_bool("DEBUG", False)
+    logger.info(f"DEBUG: {DEBUG}")
 
     RATE_LIMIT_ENABLED = _env_bool("RATE_LIMIT_ENABLED", True)
+    logger.info(f"RATE_LIMIT_ENABLED: {RATE_LIMIT_ENABLED}")
 
     CLEANUP_EMPTY_DIRECTORIES = _env_bool("CLEANUP_EMPTY_DIRECTORIES", False)
+    logger.info(f"CLEANUP_EMPTY_DIRECTORIES: {CLEANUP_EMPTY_DIRECTORIES}")

@@ -1,13 +1,13 @@
 from __future__ import annotations
 from pathlib import Path
 from flask import abort
-from .config import MEDIA_ROOT, VIDEO_EXTENSIONS
+from .config import Config
 
 
 def safe_path(rel_path: str = "") -> Path:
     try:
-        path = (MEDIA_ROOT / rel_path).resolve()
-        path.relative_to(MEDIA_ROOT.resolve())
+        path = (Config.MEDIA_ROOT / rel_path).resolve()
+        path.relative_to(Config.MEDIA_ROOT.resolve())
         return path
     except ValueError:
         abort(403)
@@ -25,7 +25,7 @@ def list_dir(rel_path: str = "") -> list[dict]:
         entry = {
             "name": p.name,
             "is_dir": p.is_dir(),
-            "is_video": p.is_file() and p.suffix.lower() in VIDEO_EXTENSIONS,
+            "is_video": p.is_file() and p.suffix.lower() in Config.VIDEO_EXTENSIONS,
             "path": str(Path(rel_path) / p.name),
         }
         if p.is_dir():
@@ -42,7 +42,7 @@ def list_dir(rel_path: str = "") -> list[dict]:
 def next_video(rel_path: str) -> str | None:
     path = safe_path(rel_path)
     parent = path.parent
-    videos = [p for p in sorted(parent.iterdir()) if p.suffix.lower() in VIDEO_EXTENSIONS]
+    videos = [p for p in sorted(parent.iterdir()) if p.suffix.lower() in Config.VIDEO_EXTENSIONS]
 
     if path in videos:
         idx = videos.index(path)
@@ -64,7 +64,7 @@ def get_parent_path(rel_path: str) -> str:
 
 def calculate_media_size() -> int:
     """Return total size in bytes of all files under MEDIA_ROOT."""
-    return sum(p.stat().st_size for p in MEDIA_ROOT.rglob("*") if p.is_file())
+    return sum(p.stat().st_size for p in Config.MEDIA_ROOT.rglob("*") if p.is_file())
 
 
 def format_size(num_bytes: int) -> str:
@@ -81,7 +81,7 @@ def format_size(num_bytes: int) -> str:
 
 def cleanup_empty_directories(
     start_path: Path,
-    stop_at: Path = MEDIA_ROOT,
+    stop_at: Path = Config.MEDIA_ROOT,
 ) -> int:
     """
     Entfernt rekursiv leere Verzeichnisse von start_path nach oben.

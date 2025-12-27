@@ -25,14 +25,7 @@ def create_app(config: dict | None = None) -> Flask:
     # Erweiterungen initialisieren
     logger.info("Initializing extensions")
     csrf.init_app(app)
-
     limiter.init_app(app)
-    # Log if the limiter is enabled
-    if app.config.get("RATELIMIT_ENABLED", True):
-        logger.info("Rate limiting is enabled")
-    else:
-        logger.info("Rate limiting is disabled")
-
     logger.info("Extensions initialized")
 
     # Blueprints registrieren

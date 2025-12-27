@@ -2,9 +2,10 @@ from __future__ import annotations
 from pathlib import Path
 from flask import Blueprint, render_template
 
-from .. import config, limiter
+from .. import limiter
 from ..utils import next_video, get_parent_path, get_breadcrumbs
 from ..logging import setup_logging
+from ..config import Config
 
 logger = setup_logging()
 
@@ -17,7 +18,7 @@ def watch(rel_path: str):
     logger.debug(f"Watch request for video: {rel_path}")
 
     # Check the files against the whitelist
-    if not any(rel_path.lower().endswith(ext) for ext in config.VIDEO_EXTENSIONS):
+    if not any(rel_path.lower().endswith(ext) for ext in Config.VIDEO_EXTENSIONS):
         logger.warning(f"Attempt to watch unsupported file type: {rel_path}")
         return "Unsupported file type", 400
 

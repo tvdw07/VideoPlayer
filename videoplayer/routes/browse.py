@@ -9,7 +9,7 @@ from ..utils import (
     get_breadcrumbs,
     safe_path, cleanup_empty_directories,
 )
-from ..config import MEDIA_ROOT, VIDEO_EXTENSIONS, Config
+from ..config import Config
 from ..logging import setup_logging
 
 logger = setup_logging()
@@ -66,7 +66,7 @@ def delete_video():
         parent = get_parent_path(rel_path)
         return redirect(url_for("browse.browse", rel_path=parent))
 
-    if path.suffix.lower() not in VIDEO_EXTENSIONS:
+    if path.suffix.lower() not in Config.VIDEO_EXTENSIONS:
         logger.warning(f"Delete attempt for non-video file: {rel_path}")
         return redirect(url_for("browse.browse")), 400
 
@@ -85,7 +85,7 @@ def delete_video():
         logger.error(f"Error deleting file '{rel_path}': {str(e)}", exc_info=True)
         flash("Fehler beim Löschen der Datei", "danger")
 
-    parent = str(path.parent.relative_to(MEDIA_ROOT))
+    parent = str(path.parent.relative_to(Config.MEDIA_ROOT))
     if parent == ".":
         parent = ""
 
@@ -97,7 +97,7 @@ def delete_video():
             logger.info("Cleanup removed %d empty directories", removed)
             # Recalculate parent if it was deleted
             if not cleanup_parent.exists():
-                parent = str(cleanup_parent.parent.relative_to(MEDIA_ROOT))
+                parent = str(cleanup_parent.parent.relative_to(Config.MEDIA_ROOT))
                 if parent == ".":
                     parent = ""
 
