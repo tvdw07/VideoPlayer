@@ -4,7 +4,7 @@ from videoplayer import create_app
 
 def main():
     app = create_app()
-    app.run(host="0.0.0.0", port=8000, debug=app.config.get("DEBUG"))
+    app.run(host=app.config.get("HOST"), port=app.config.get("PORT"), debug=app.config.get("DEBUG"))
 
 
 if __name__ == "__main__":
