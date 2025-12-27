@@ -26,7 +26,6 @@ def browse(rel_path: str = ""):
     breadcrumbs = get_breadcrumbs(rel_path)
 
 
-    to_be_removed = []
 
     # For every video, create a separate form with its own CSRF token and remove non-video files
     for item in items:
@@ -34,12 +33,7 @@ def browse(rel_path: str = ""):
             form = DeleteVideoForm()
             form.video_path.data = item["path"]
             item["form"] = form
-        else:
-            # Remove non-video files from the listing
-            to_be_removed.append(item)
 
-    for item in to_be_removed:
-        items.remove(item)
 
     logger.debug(f"Listed {len(items)} items in {rel_path or 'root'}")
     return render_template(
