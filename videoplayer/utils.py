@@ -1,11 +1,14 @@
 from __future__ import annotations
 from pathlib import Path
+
+import werkzeug
 from flask import abort
 from .config import Config
 
 
 def safe_path(rel_path: str = "") -> Path:
     try:
+        rel_path = werkzeug.utils.secure_filename(rel_path)
         path = (Config.MEDIA_ROOT / rel_path).resolve()
         path.relative_to(Config.MEDIA_ROOT.resolve())
         return path
@@ -58,6 +61,7 @@ def get_breadcrumbs(rel_path: str) -> list[str]:
 
 
 def get_parent_path(rel_path: str) -> str:
+    rel_path = safe_path(rel_path)
     parent = Path(rel_path).parent
     return "" if parent == Path(".") else str(parent)
 
