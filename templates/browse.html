@@ -5,7 +5,7 @@
 
 <ul class="list-group">
 
-  {% if parent %}
+  {% if current %}
   <li class="list-group-item">
     <a href="/browse/{{ parent }}">⬅️ Zurück</a>
   </li>
@@ -24,7 +24,7 @@
       </div>
 
       {% if item.is_video and item.form %}
-        <form method="post" action="{{ url_for('main.delete_video') }}" onsubmit="return confirm('Video löschen? Dies kann nicht rückgängig gemacht werden.');">
+        <form method="post" action="{{ url_for('browse.delete_video') }}" onsubmit="return confirm('Video löschen? Dies kann nicht rückgängig gemacht werden.');">
           {{ item.form.hidden_tag() }}
           {{ item.form.video_path }}
           <button type="submit" class="btn btn-sm btn-outline-danger">Löschen</button>
