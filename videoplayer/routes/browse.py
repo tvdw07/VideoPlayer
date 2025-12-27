@@ -1,6 +1,7 @@
 from __future__ import annotations
 from flask import Blueprint, render_template, redirect, url_for, flash
 
+from .. import limiter
 from ..forms import DeleteVideoForm
 from ..utils import (
     list_dir,
@@ -19,6 +20,7 @@ browse_bp = Blueprint("browse", __name__)
 @browse_bp.route("/")
 @browse_bp.route("/browse/")
 @browse_bp.route("/browse/<path:rel_path>")
+@limiter.limit("30 per minute")
 def browse(rel_path: str = ""):
     logger.debug(f"Browse request for path: {rel_path or 'root'}")
     items = list_dir(rel_path)
@@ -42,6 +44,7 @@ def browse(rel_path: str = ""):
 
 
 @browse_bp.route("/delete", methods=["POST"])
+@limiter.limit("10 per minute")
 def delete_video():
     form = DeleteVideoForm()
 

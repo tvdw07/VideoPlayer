@@ -1,12 +1,14 @@
 from __future__ import annotations
 from flask import Blueprint, render_template
 
+from .. import limiter
 from ..utils import calculate_media_size, format_size
 
 settings_bp = Blueprint("settings", __name__)
 
 
 @settings_bp.route("/settings")
+@limiter.limit("10 per minute")
 def index():
     total_bytes = calculate_media_size()
     return render_template(

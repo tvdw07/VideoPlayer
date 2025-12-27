@@ -46,3 +46,5 @@ class Config:
     VIDEO_EXTENSIONS = VIDEO_EXTENSIONS
 
     DEBUG = _env_bool("DEBUG", False)
+
+    RATE_LIMIT_ENABLED = _env_bool("RATE_LIMIT_ENABLED", True)

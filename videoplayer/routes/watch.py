@@ -2,7 +2,7 @@ from __future__ import annotations
 from pathlib import Path
 from flask import Blueprint, render_template
 
-from .. import config
+from .. import config, limiter
 from ..utils import next_video, get_parent_path, get_breadcrumbs
 from ..logging import setup_logging
 
@@ -12,6 +12,7 @@ watch_bp = Blueprint("watch", __name__)
 
 
 @watch_bp.route("/watch/<path:rel_path>")
+@limiter.limit("10 per minute")
 def watch(rel_path: str):
     logger.debug(f"Watch request for video: {rel_path}")
 
