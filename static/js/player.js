@@ -1,4 +1,5 @@
 const player = videojs('player');
+player.autoplay(true);
 
 // Tastatursteuerung GLOBAL
 document.addEventListener('keydown', (e) => {
