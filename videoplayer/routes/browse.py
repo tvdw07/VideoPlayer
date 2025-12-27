@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import werkzeug
 from flask import Blueprint, render_template, redirect, url_for, flash
 
 from .. import limiter
