@@ -4,6 +4,7 @@ from pathlib import Path
 from flask import abort
 from .config import Config
 from natsort import natsorted
+from os import path
 
 
 def safe_path(rel_path: str = "") -> Path:
@@ -14,7 +15,7 @@ def safe_path(rel_path: str = "") -> Path:
     except FileNotFoundError:
         abort(404)
 
-    # Symlink-Schutz: alle Parent-Pfade müssen innerhalb von root liegen
+    # Symlink Protection
     if root not in path.parents and path != root:
         abort(404)
 
