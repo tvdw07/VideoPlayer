@@ -7,7 +7,7 @@
 
   {% if current %}
   <li class="list-group-item">
-    <a href="/browse/{{ parent }}">⬅️ Zurück</a>
+    <a href="{{ url_for('browse.browse', rel_path=parent) }}">⬅️ Zurück</a>
   </li>
   {% endif %}
 
@@ -35,5 +35,33 @@
   {% endfor %}
 
 </ul>
+
+{% if pagination and pagination.pages > 1 %}
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <div class="small text-secondary">
+      Seite {{ pagination.page }} / {{ pagination.pages }} • {{ pagination.total }} Einträge
+    </div>
+
+    <nav aria-label="Pagination">
+      <ul class="pagination pagination-sm mb-0">
+        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+          {% if pagination.has_prev %}
+            <a class="page-link" href="{{ url_for('browse.browse', rel_path=current, page=pagination.prev_page) }}">←</a>
+          {% else %}
+            <span class="page-link">←</span>
+          {% endif %}
+        </li>
+
+        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+          {% if pagination.has_next %}
+            <a class="page-link" href="{{ url_for('browse.browse', rel_path=current, page=pagination.next_page) }}">→</a>
+          {% else %}
+            <span class="page-link">→</span>
+          {% endif %}
+        </li>
+      </ul>
+    </nav>
+  </div>
+{% endif %}
 
 {% endblock %}

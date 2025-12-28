@@ -71,3 +71,11 @@ class Config:
     if not (1 <= PORT <= 65535):
         raise ValueError("PORT must be an integer between 1 and 65535")
     logger.info(f"PORT: {PORT}")
+
+    # Pagination (Browse/Search, etc.)
+    DEFAULT_PER_PAGE = int(os.getenv("DEFAULT_PER_PAGE", "12"))
+
+    if DEFAULT_PER_PAGE < 1:
+        raise ValueError("DEFAULT_PER_PAGE must be >= 1")
+
+    logger.info(f"DEFAULT_PER_PAGE: {DEFAULT_PER_PAGE}")

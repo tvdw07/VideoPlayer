@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, request
 
 from .. import limiter
 from ..forms import DeleteVideoForm
@@ -8,7 +8,10 @@ from ..utils import (
     list_dir,
     get_parent_path,
     get_breadcrumbs,
-    safe_path, cleanup_empty_directories,
+    safe_path,
+    cleanup_empty_directories,
+    clamp_pagination_params,
+    paginate_list,
 )
 from ..config import Config
 from ..logging import setup_logging
@@ -24,23 +27,40 @@ browse_bp = Blueprint("browse", __name__)
 @limiter.limit("30 per minute")
 def browse(rel_path: str = ""):
     logger.debug(f"Browse request for path: {rel_path or 'root'}")
-    items = list_dir(rel_path)
+
+    # Pagination (URL enthält nur page; per_page kommt aus Config/.env)
+    page = clamp_pagination_params(request.args.get("page"))
+
+    all_items = list_dir(rel_path)
     parent = get_parent_path(rel_path)
     breadcrumbs = get_breadcrumbs(rel_path)
 
+    pagination = paginate_list(all_items, page=page)
+    items = pagination["items"]
 
-
-    # For every video, create a separate form with its own CSRF token and remove non-video files
+    # For every video, create a separate form with its own CSRF token
     for item in items:
         if item.get("is_video"):
             form = DeleteVideoForm()
             form.video_path.data = item["path"]
             item["form"] = form
 
+    logger.debug(
+        "Listed %d items in %s (page %d/%d, per_page=%d)",
+        pagination["total"],
+        rel_path or "root",
+        pagination["page"],
+        pagination["pages"],
+        pagination["per_page"],
+    )
 
-    logger.debug(f"Listed {len(items)} items in {rel_path or 'root'}")
     return render_template(
-        "browse.html", items=items, current=rel_path, parent=parent, breadcrumbs=breadcrumbs
+        "browse.html",
+        items=items,
+        current=rel_path,
+        parent=parent,
+        breadcrumbs=breadcrumbs,
+        pagination=pagination,
     )
 
 
@@ -103,4 +123,3 @@ def delete_video():
                     parent = ""
 
     return redirect(url_for("browse.browse", rel_path=parent))
-

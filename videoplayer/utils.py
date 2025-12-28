@@ -193,3 +193,43 @@ def cleanup_empty_directories(
         current = current.parent
 
     return deleted
+
+
+def clamp_pagination_params(page: int | str | None) -> int:
+
+    try:
+        page_i = int(page)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        page_i = 1
+
+    if page_i < 1:
+        page_i = 1
+
+    return page_i
+
+
+def paginate_list(items: list, page: int, per_page: int | None = None) -> dict:
+    if per_page is None:
+        per_page = Config.DEFAULT_PER_PAGE
+
+    total = len(items)
+    pages = max(1, (total + per_page - 1) // per_page)
+
+    # Wenn page > pages: auf letzte Seite clampen
+    if page > pages:
+        page = pages
+
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    return {
+        "items": items[start:end],
+        "page": page,
+        "per_page": per_page,
+        "total": total,
+        "pages": pages,
+        "has_prev": page > 1,
+        "has_next": page < pages,
+        "prev_page": page - 1 if page > 1 else None,
+        "next_page": page + 1 if page < pages else None,
+    }
