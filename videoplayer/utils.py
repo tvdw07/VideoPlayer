@@ -7,12 +7,18 @@ from natsort import natsorted
 
 
 def safe_path(rel_path: str = "") -> Path:
+    root = Config.MEDIA_ROOT.resolve()
+
     try:
-        path = (Config.MEDIA_ROOT / rel_path).resolve()
-        path.relative_to(Config.MEDIA_ROOT.resolve())
-        return path
-    except ValueError:
-        abort(403)
+        path = (root / rel_path).resolve(strict=True)
+    except FileNotFoundError:
+        abort(404)
+
+    # Symlink-Schutz: alle Parent-Pfade müssen innerhalb von root liegen
+    if root not in path.parents and path != root:
+        abort(404)
+
+    return path
 
 
 def list_dir(rel_path: str = "") -> list[dict]:
