@@ -4,7 +4,7 @@ from wtforms.validators import DataRequired
 
 
 class DeleteVideoForm(FlaskForm):
-    """Form für sicheres Löschen von Videos mit CSRF-Protection."""
+    """Form to delete a video file."""
     video_path = HiddenField(validators=[DataRequired()])
     submit = SubmitField("Löschen")
 

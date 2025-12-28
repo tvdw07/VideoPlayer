@@ -22,13 +22,13 @@ def create_app(config: dict | None = None) -> Flask:
     if config:
         app.config.update(config)
 
-    # Erweiterungen initialisieren
+    # Initializing extensions
     logger.info("Initializing extensions")
     csrf.init_app(app)
     limiter.init_app(app)
     logger.info("Extensions initialized")
 
-    # Blueprints registrieren
+    # Registering blueprints
     logger.info("Registering blueprints")
     app.register_blueprint(browse_bp)
     app.register_blueprint(watch_bp)
