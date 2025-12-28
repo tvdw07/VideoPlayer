@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.env
+.git
+.idea
+.vscode
+media/*
+!media/.gitkeep
+tests/
