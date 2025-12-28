@@ -28,7 +28,7 @@
         </div>
 
         <div class="text-end">
-          <form method="post" action="/settings/recalculate" class="m-0">
+          <form method="post" action="{{ url_for('settings.recalculate') }}" class="m-0">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <button type="submit" class="btn btn-outline-light">
               Speicher neu berechnen
