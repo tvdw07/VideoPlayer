@@ -12,7 +12,7 @@ media_bp = Blueprint("media", __name__)
 
 
 @media_bp.route("/media/<path:rel_path>")
-@limiter.limit("10 per minute")
+@limiter.exempt
 def media(rel_path: str):
     logger.debug(f"Media file request: {rel_path}")
     path = safe_path(rel_path)
