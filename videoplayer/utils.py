@@ -14,9 +14,10 @@ def safe_path(rel_path: str = "") -> Path:
     except FileNotFoundError:
         abort(404)
 
-    # Symlink Protection
-    if root not in path.parents and path != root:
-        abort(404)
+    try:
+        path.relative_to(root)
+    except ValueError:
+        abort(404)  # Access outside the allowed area
 
     return path
 
