@@ -3,15 +3,22 @@ from pathlib import Path
 
 from flask import abort
 from .config import Config
+from natsort import natsorted
 
 
 def safe_path(rel_path: str = "") -> Path:
+    root = Config.MEDIA_ROOT.resolve()
+
     try:
-        path = (Config.MEDIA_ROOT / rel_path).resolve()
-        path.relative_to(Config.MEDIA_ROOT.resolve())
-        return path
-    except ValueError:
-        abort(403)
+        path = (root / rel_path).resolve(strict=True)
+    except FileNotFoundError:
+        abort(404)
+
+    # Symlink-Schutz: alle Parent-Pfade müssen innerhalb von root liegen
+    if root not in path.parents and path != root:
+        abort(404)
+
+    return path
 
 
 def list_dir(rel_path: str = "") -> list[dict]:
@@ -43,13 +50,24 @@ def list_dir(rel_path: str = "") -> list[dict]:
 def next_video(rel_path: str) -> str | None:
     path = safe_path(rel_path)
     parent = path.parent
-    videos = [p for p in sorted(parent.iterdir()) if p.suffix.lower() in Config.VIDEO_EXTENSIONS]
 
-    if path in videos:
+    videos = [
+        p for p in parent.iterdir()
+        if p.suffix.lower() in Config.VIDEO_EXTENSIONS
+    ]
+
+    videos = natsorted(videos, key=lambda p: p.name)
+
+    try:
         idx = videos.index(path)
-        if idx + 1 < len(videos):
-            return str(Path(rel_path).parent / videos[idx + 1].name)
+    except ValueError:
+        return None
+
+    if idx + 1 < len(videos):
+        return str(Path(rel_path).parent / videos[idx + 1].name)
+
     return None
+
 
 
 def get_breadcrumbs(rel_path: str) -> list[str]:
