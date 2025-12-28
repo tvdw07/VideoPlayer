@@ -3,27 +3,23 @@
 
 <div class="position-relative">
 
-  <!-- Zurück Button -->
-  <a href="/browse/{{ parent }}"
-     class="btn btn-dark position-absolute top-0 start-0 m-2 z-3">
-    ⬅ Zurück
-  </a>
+    <a href="/browse/{{ parent }}"
+       class="btn btn-sm text-light position-absolute top-0 start-0 m-2 player-back z-3">
+        ← Zurück
+    </a>
 
-  <!-- Dateiname -->
-  <div class="player-title position-absolute top-0 w-100 text-center z-2">
-    {{ filename }}
-  </div>
+    <div class="player-title position-absolute top-0 w-100 text-center z-2">
+        {{ filename }}
+    </div>
 
-  <video
-    id="player"
-    class="video-js vjs-default-skin vjs-fluid"
-    controls
-    preload="auto"
-    playsinline
-    data-setup='{}'>
+    <video id="player"
+           class="video-js vjs-fluid"
+           controls
+           preload="auto"
+           playsinline>
 
-    <source src="/media/{{ video }}" type="video/mp4">
-  </video>
+        <source src="/media/{{ video }}" type="video/mp4">
+    </video>
 
 </div>
 
