@@ -13,13 +13,33 @@
   <div class="card shadow-sm border-0 bg-dark bg-opacity-75">
     <div class="card-body">
 
-      <div class="d-flex justify-content-between align-items-start">
+      <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
         <div>
           <h6 class="text-uppercase text-light mb-1 small">
             Gesamter Speicherverbrauch
           </h6>
           <div class="display-6 fw-bold text-light">
-            {{ total_formatted }}
+            {% if total_formatted %}
+              {{ total_formatted }}
+            {% else %}
+              —
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="text-end">
+          <form method="post" action="{{ url_for('settings.recalculate') }}" class="m-0">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-outline-light">
+              Speicher neu berechnen
+            </button>
+          </form>
+          <div class="mt-2 small text-secondary">
+            {% if cached_at %}
+              Zuletzt berechnet: {{ cached_at }}
+            {% else %}
+              Noch nicht berechnet
+            {% endif %}
           </div>
         </div>
       </div>
@@ -27,7 +47,11 @@
       <hr class="border-secondary my-3">
 
       <p class="text-secondary mb-0 small">
-        Entspricht exakt {{ total_bytes }} Bytes
+        {% if total_bytes is not none %}
+          Entspricht exakt {{ total_bytes }} Bytes
+        {% else %}
+          Noch kein Wert im Cache. Bitte "Speicher neu berechnen" klicken.
+        {% endif %}
       </p>
     </div>
   </div>

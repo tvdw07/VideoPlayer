@@ -14,9 +14,10 @@ def safe_path(rel_path: str = "") -> Path:
     except FileNotFoundError:
         abort(404)
 
-    # Symlink-Schutz: alle Parent-Pfade müssen innerhalb von root liegen
-    if root not in path.parents and path != root:
-        abort(404)
+    try:
+        path.relative_to(root)
+    except ValueError:
+        abort(404)  # Access outside the allowed area
 
     return path
 
@@ -97,6 +98,70 @@ def format_size(num_bytes: int) -> str:
         size /= step
     # Fallback; should not be reached
     return f"{size:.2f} {units[-1]}"
+
+
+def _media_size_cache_path(app=None) -> Path:
+    """Pfad zur Cache-Datei (persistiert im instance folder)."""
+    # Import lokal halten, um zirkuläre Imports zu vermeiden
+    if app is None:
+        from flask import current_app
+
+        app = current_app
+
+    # instance_path existiert bei Flask immer; wir stellen sicher, dass der Ordner existiert.
+    instance_path = Path(app.instance_path)
+    instance_path.mkdir(parents=True, exist_ok=True)
+    return instance_path / "media_size_cache.json"
+
+
+def get_cached_media_size(app=None) -> dict | None:
+    """Liest den gecachten Media-Size-Wert.
+
+    Returns:
+        {"bytes": int, "updated_at": str(ISO)} oder None falls nicht vorhanden/ungültig.
+    """
+    import json
+
+    cache_file = _media_size_cache_path(app)
+    if not cache_file.exists():
+        return None
+
+    try:
+        data = json.loads(cache_file.read_text(encoding="utf-8"))
+        cached_bytes = data.get("bytes")
+        updated_at_str = data.get("updated_at")
+        if (
+            not isinstance(cached_bytes, int)
+            or cached_bytes < 0
+            or not isinstance(updated_at_str, str)
+            or not updated_at_str
+        ):
+            return None
+        return {"bytes": cached_bytes, "updated_at": updated_at_str}
+    except Exception:
+        # Bei kaputter Datei lieber "kein Cache" statt harter Fehler.
+        return None
+
+
+def set_cached_media_size(app=None, total_bytes: int = 0) -> None:
+    """Schreibt den Media-Size-Cache atomar."""
+    import json
+    from datetime import datetime, timezone
+
+    if not isinstance(total_bytes, int) or total_bytes < 0:
+        raise ValueError("total_bytes must be a non-negative int")
+
+    cache_file = _media_size_cache_path(app)
+    tmp = cache_file.with_suffix(cache_file.suffix + ".tmp")
+
+    payload = {
+        "bytes": total_bytes,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    tmp.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+    tmp.replace(cache_file)
+
 
 def cleanup_empty_directories(
     start_path: Path,
