@@ -28,7 +28,7 @@ browse_bp = Blueprint("browse", __name__)
 def browse(rel_path: str = ""):
     logger.debug(f"Browse request for path: {rel_path or 'root'}")
 
-    # Pagination (URL enthält nur page; per_page kommt aus Config/.env)
+    # Pagination (URL contains only page; per_page comes from Config/.env)
     page = clamp_pagination_params(request.args.get("page"))
 
     all_items = list_dir(rel_path)
