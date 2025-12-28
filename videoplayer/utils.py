@@ -128,11 +128,16 @@ def get_cached_media_size(app=None) -> dict | None:
 
     try:
         data = json.loads(cache_file.read_text(encoding="utf-8"))
-        b = data.get("bytes")
-        ts = data.get("updated_at")
-        if not isinstance(b, int) or b < 0 or not isinstance(ts, str) or not ts:
+        cached_bytes = data.get("bytes")
+        updated_at_str = data.get("updated_at")
+        if (
+            not isinstance(cached_bytes, int)
+            or cached_bytes < 0
+            or not isinstance(updated_at_str, str)
+            or not updated_at_str
+        ):
             return None
-        return {"bytes": b, "updated_at": ts}
+        return {"bytes": cached_bytes, "updated_at": updated_at_str}
     except Exception:
         # Bei kaputter Datei lieber "kein Cache" statt harter Fehler.
         return None
