@@ -1,16 +1,104 @@
+/* Base */
+body {
+    background-color: #0f1115;
+}
+
 a {
-  text-decoration: none;
+    text-decoration: none;
 }
 
+/* List / Browse */
 .list-group-item {
-  cursor: pointer;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.15s ease, transform 0.1s ease;
 }
 
+.list-group-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(2px);
+}
+
+.list-group-item a {
+    color: #eaeaea;
+}
+
+.list-group-item a:hover {
+    color: #6ddcff;
+}
+
+/* File type emphasis */
+.item-dir {
+    font-weight: 600;
+}
+
+.item-video {
+    color: #6ddcff;
+}
+
+.item-file {
+    color: #b0b0b0;
+}
+
+/* Player */
 .player-title {
-  background: rgba(0, 0, 0, 0.65);
-  color: #fff;
-  padding: 6px 12px;
-  font-size: 0.9rem;
-  backdrop-filter: blur(4px);
-  pointer-events: none;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+    color: #fff;
+    padding: 10px 16px;
+    font-size: 0.95rem;
+    backdrop-filter: blur(6px);
+    pointer-events: none;
+}
+
+/* Player back button */
+.player-back {
+    background: rgba(0, 0, 0, 0.6);
+    border: none;
+    backdrop-filter: blur(4px);
+}
+
+.player-back:hover {
+    background: rgba(0, 0, 0, 0.85);
+}
+
+/* Pagination */
+.page-link {
+    background: transparent;
+    color: #ccc;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.page-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Cards */
+.card {
+    border-radius: 12px;
+}
+
+/* Buttons */
+.btn {
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Settings: Storage Highlight */
+.storage-value {
+    font-size: clamp(2.8rem, 5vw, 3.6rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: #6ddcff; /* Akzentfarbe */
+    letter-spacing: -0.02em;
+}
+
+.storage-value small {
+    font-size: 0.45em;
+    color: rgba(255, 255, 255, 0.6);
+    margin-left: 0.15em;
 }

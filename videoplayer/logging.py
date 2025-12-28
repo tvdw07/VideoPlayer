@@ -5,16 +5,16 @@ from pathlib import Path
 
 def setup_logging(log_file: str | None = None, log_level: int = INFO) -> Logger:
     """
-    Richte ein strukturiertes Logging-System ein und gib den benannten Logger zurück.
+    Set up a structured logging system and return the named logger.
 
     Args:
-        log_file: Optionaler Pfad zu einer Log-Datei. Wenn None, nur Console-Logging.
-        log_level: Logging-Level (default: INFO)
+        log_file: Optional path to a log file. If None, console logging only.
+        log_level: Logging level (default: INFO)
     """
     logger = getLogger("videoplayer")
     logger.setLevel(log_level)
 
-    # Verhindere doppeltes Logging bei mehrfachem Aufruf
+    # Prevent double logging when called multiple times
     if logger.hasHandlers():
         return logger
 

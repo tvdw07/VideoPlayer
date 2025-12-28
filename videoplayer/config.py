@@ -4,14 +4,14 @@ import os
 from videoplayer.logging import setup_logging
 
 logger = setup_logging()
-# .env laden
+# load .env
 try:
     from dotenv import load_dotenv
     _ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
     if _ENV_PATH.exists():
         load_dotenv(dotenv_path=_ENV_PATH)
 except Exception:
-    # Falls dotenv nicht installiert ist, läuft die App trotzdem mit OS-ENV/Defaults
+    # IF dotenv is not installed or .env file does not exist, skip loading and use default values
     pass
 
 
@@ -32,11 +32,11 @@ class Config:
     if not SECRET_KEY:
         raise ValueError("SECRET_KEY is not set in environment variables")
 
-    # Projektbasis: Ordner über dem Paket
+    # Projekt-Root-Dir
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
     logger.info(f"BASE_DIR: {BASE_DIR}")
 
-    # Medienstamm: per ENV MEDIA_ROOT überschreibbar, sonst <project>/media
+    # Mediaroot: overridable via ENV MEDIA_ROOT, else <project>/media
     MEDIA_ROOT: Path = Path(os.getenv("MEDIA_ROOT", str(BASE_DIR / "media"))).resolve()
     logger.info(f"MEDIA_ROOT: {MEDIA_ROOT}")
 
@@ -45,7 +45,7 @@ class Config:
         MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
         logger.debug("Created MEDIA_ROOT")
 
-    # Unterstützte Video-Erweiterungen
+    # Supported video file extensions
     VIDEO_EXTENSIONS: set[str] = {".mp4"}
     logger.info(f"Supported video extensions: {VIDEO_EXTENSIONS}")
 
@@ -71,3 +71,11 @@ class Config:
     if not (1 <= PORT <= 65535):
         raise ValueError("PORT must be an integer between 1 and 65535")
     logger.info(f"PORT: {PORT}")
+
+    # Pagination (Browse/Search, etc.)
+    DEFAULT_PER_PAGE = int(os.getenv("DEFAULT_PER_PAGE", "12"))
+
+    if DEFAULT_PER_PAGE < 1:
+        raise ValueError("DEFAULT_PER_PAGE must be >= 1")
+
+    logger.info(f"DEFAULT_PER_PAGE: {DEFAULT_PER_PAGE}")

@@ -1,39 +1,66 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h4>📁 {{ current or "media" }}</h4>
+<h4 class="mb-3">📁 {{ current or "media" }}</h4>
 
 <ul class="list-group">
 
-  {% if current %}
-  <li class="list-group-item">
-    <a href="/browse/{{ parent }}">⬅️ Zurück</a>
-  </li>
-  {% endif %}
+    {% if current %}
+    <li class="list-group-item">
+        <a href="{{ url_for('browse.browse', rel_path=parent) }}">← Zurück</a>
+    </li>
+    {% endif %}
 
-  {% for item in items %}
+    {% for item in items %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
-      <div>
-        {% if item.is_dir %}
-          📁 <a href="/browse/{{ item.path }}">{{ item.name }}</a>
-        {% elif item.is_video %}
-          ▶️ <a href="/watch/{{ item.path }}">{{ item.name }}</a>
-        {% else %}
-          📄 {{ item.name }}
-        {% endif %}
-      </div>
 
-      {% if item.is_video and item.form %}
-        <form method="post" action="{{ url_for('browse.delete_video') }}" onsubmit="return confirm('Video löschen? Dies kann nicht rückgängig gemacht werden.');">
-          {{ item.form.hidden_tag() }}
-          {{ item.form.video_path }}
-          <button type="submit" class="btn btn-sm btn-outline-danger">Löschen</button>
+        <div>
+            {% if item.is_dir %}
+            <span class="item-dir">📁</span>
+            <a href="/browse/{{ item.path }}" class="item-dir">{{ item.name }}</a>
+
+            {% elif item.is_video %}
+            <span class="item-video">▶</span>
+            <a href="/watch/{{ item.path }}" class="item-video">{{ item.name }}</a>
+
+            {% else %}
+            <span class="item-file">📄 {{ item.name }}</span>
+            {% endif %}
+        </div>
+
+        {% if item.is_video and item.form %}
+        <form method="post" action="{{ url_for('browse.delete_video') }}"
+              onsubmit="return confirm('Video wirklich löschen?');">
+            {{ item.form.hidden_tag() }}
+            {{ item.form.video_path }}
+            <button type="submit" class="btn btn-sm btn-outline-danger">
+                Löschen
+            </button>
         </form>
-      {% endif %}
+        {% endif %}
 
     </li>
-  {% endfor %}
-
+    {% endfor %}
 </ul>
+
+{% if pagination and pagination.pages > 1 %}
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <small class="text-secondary">
+        Seite {{ pagination.page }} / {{ pagination.pages }}
+    </small>
+
+    <ul class="pagination pagination-sm mb-0">
+        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('browse.browse', rel_path=current, page=pagination.prev_page) }}">←</a>
+        </li>
+
+        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('browse.browse', rel_path=current, page=pagination.next_page) }}">→</a>
+        </li>
+    </ul>
+</div>
+{% endif %}
 
 {% endblock %}

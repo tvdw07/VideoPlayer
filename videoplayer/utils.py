@@ -101,24 +101,25 @@ def format_size(num_bytes: int) -> str:
 
 
 def _media_size_cache_path(app=None) -> Path:
-    """Pfad zur Cache-Datei (persistiert im instance folder)."""
-    # Import lokal halten, um zirkuläre Imports zu vermeiden
+    """Path to the cache file (persistent in the instance folder)."""
+    # Keep imports local to avoid circular imports
     if app is None:
         from flask import current_app
 
         app = current_app
 
-    # instance_path existiert bei Flask immer; wir stellen sicher, dass der Ordner existiert.
+    # instance_path always exists in Flask; we ensure that the folder exists.
     instance_path = Path(app.instance_path)
     instance_path.mkdir(parents=True, exist_ok=True)
     return instance_path / "media_size_cache.json"
 
 
 def get_cached_media_size(app=None) -> dict | None:
-    """Liest den gecachten Media-Size-Wert.
+    """
+    Reads the cached media size value.
 
     Returns:
-        {"bytes": int, "updated_at": str(ISO)} oder None falls nicht vorhanden/ungültig.
+        {‘bytes’: int, ‘updated_at’: str(ISO)} or None if not available/invalid.
     """
     import json
 
@@ -139,12 +140,11 @@ def get_cached_media_size(app=None) -> dict | None:
             return None
         return {"bytes": cached_bytes, "updated_at": updated_at_str}
     except Exception:
-        # Bei kaputter Datei lieber "kein Cache" statt harter Fehler.
+        # If the cache file is corrupted, return None
         return None
 
 
 def set_cached_media_size(app=None, total_bytes: int = 0) -> None:
-    """Schreibt den Media-Size-Cache atomar."""
     import json
     from datetime import datetime, timezone
 
@@ -168,10 +168,10 @@ def cleanup_empty_directories(
     stop_at: Path = Config.MEDIA_ROOT,
 ) -> int:
     """
-    Entfernt rekursiv leere Verzeichnisse von start_path nach oben.
+    Recursively removes empty directories from start_path upwards.
 
     Returns:
-        Anzahl der gelöschten Verzeichnisse
+        Number of directories deleted
     """
     deleted = 0
     current = start_path
@@ -181,7 +181,7 @@ def cleanup_empty_directories(
             break
 
         try:
-            # leer?
+            # If directory is not empty, stop
             if any(current.iterdir()):
                 break
 
@@ -193,3 +193,43 @@ def cleanup_empty_directories(
         current = current.parent
 
     return deleted
+
+
+def clamp_pagination_params(page: int | str | None) -> int:
+
+    try:
+        page_i = int(page)
+    except (TypeError, ValueError):
+        page_i = 1
+
+    if page_i < 1:
+        page_i = 1
+
+    return page_i
+
+
+def paginate_list(items: list, page: int, per_page: int | None = None) -> dict:
+    if per_page is None:
+        per_page = Config.DEFAULT_PER_PAGE
+
+    total = len(items)
+    pages = max(1, (total + per_page - 1) // per_page)
+
+    # If page > pages: clamp to last page
+    if page > pages:
+        page = pages
+
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    return {
+        "items": items[start:end],
+        "page": page,
+        "per_page": per_page,
+        "total": total,
+        "pages": pages,
+        "has_prev": page > 1,
+        "has_next": page < pages,
+        "prev_page": page - 1 if page > 1 else None,
+        "next_page": page + 1 if page < pages else None,
+    }

@@ -1,0 +1,11 @@
+services:
+  videoplayer:
+    build: .
+    image: videoplayer
+    ports:
+      - "${PORT:-8000}:8000"
+    volumes:
+      - ./media:/app/media
+    env_file:
+      - .env
+    restart: unless-stopped
