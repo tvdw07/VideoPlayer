@@ -54,7 +54,7 @@ def next_video(rel_path: str) -> str | None:
 
     videos = [
         p for p in parent.iterdir()
-        if p.suffix.lower() in Config.VIDEO_EXTENSIONS
+        if p.is_file() and p.suffix.lower() in Config.VIDEO_EXTENSIONS
     ]
 
     videos = natsorted(videos, key=lambda p: p.name)
@@ -65,7 +65,9 @@ def next_video(rel_path: str) -> str | None:
         return None
 
     if idx + 1 < len(videos):
-        return str(Path(rel_path).parent / videos[idx + 1].name)
+        next_path = str(Path(rel_path).parent / videos[idx + 1].name)
+        # Stelle sicher, dass Forward-Slashes verwendet werden
+        return next_path.replace("\\", "/")
 
     return None
 

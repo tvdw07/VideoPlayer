@@ -17,11 +17,11 @@
         <div>
             {% if item.is_dir %}
             <span class="item-dir">📁</span>
-            <a href="/browse/{{ item.path }}" class="item-dir">{{ item.name }}</a>
+            <a href="{{ url_for('browse.browse', rel_path=item.path) }}" class="item-dir">{{ item.name }}</a>
 
             {% elif item.is_video %}
             <span class="item-video">▶</span>
-            <a href="/watch/{{ item.path }}" class="item-video">{{ item.name }}</a>
+            <a href="{{ url_for('watch.watch', rel_path=item.path) }}" class="item-video">{{ item.name }}</a>
 
             {% else %}
             <span class="item-file">📄 {{ item.name }}</span>
