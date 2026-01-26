@@ -235,3 +235,34 @@ def paginate_list(items: list, page: int, per_page: int | None = None) -> dict:
         "prev_page": page - 1 if page > 1 else None,
         "next_page": page + 1 if page < pages else None,
     }
+
+
+def best_effort_secure_delete(path: str, passes: int = 1) -> bool:
+    import os
+
+    chunk = 1024 * 1024
+
+    try:
+        fd = os.open(path, os.O_RDWR)
+        size = os.stat(fd).st_size
+
+        for _ in range(passes):
+            os.lseek(fd, 0, os.SEEK_SET)
+            remaining = size
+            while remaining > 0:
+                n = min(chunk, remaining)
+                os.write(fd, b"\x00" * n)
+                remaining -= n
+            os.fsync(fd)
+
+        # Linux only: deallocate blocks
+        try:
+            os.posix_fallocate(fd, 0, size)  # fallback if punch hole unavailable
+        except Exception:
+            pass
+
+        os.close(fd)
+        os.unlink(path)
+        return True
+    except Exception:
+        return False
