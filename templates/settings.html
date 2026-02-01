@@ -8,6 +8,43 @@
         <h4 class="mb-0">Einstellungen</h4>
     </div>
 
+    <div class="card bg-dark bg-opacity-75 shadow-sm mb-4">
+        <div class="card-body">
+            <form method="post" action="{{ url_for('settings.update_settings') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="d-flex justify-content-between flex-wrap gap-3">
+                    <div>
+                        <small class="text-uppercase text-secondary">
+                            Aufraeumen nach Loeschung
+                        </small>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="cleanupToggle"
+                                   name="cleanup_empty_directories"
+                                   {% if cleanup_enabled %}checked{% endif %}>
+                            <label class="form-check-label" for="cleanupToggle">
+                                Leere Ordner automatisch entfernen
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="text-end">
+                        <small class="text-uppercase text-secondary">
+                            Eintraege pro Seite
+                        </small>
+                        <input class="form-control form-control-sm mt-2 text-end"
+                               type="number" min="1" name="default_per_page"
+                               value="{{ default_per_page }}" style="max-width: 160px;">
+                    </div>
+                </div>
+
+                <button class="btn btn-outline-light mt-3">
+                    Speichern
+                </button>
+            </form>
+        </div>
+    </div>
+
     <div class="card bg-dark bg-opacity-75 shadow-sm">
         <div class="card-body">
 
