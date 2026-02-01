@@ -28,7 +28,7 @@ browse_bp = Blueprint("browse", __name__)
 def browse(rel_path: str = ""):
     logger.debug(f"Browse request for path: {rel_path or 'root'}")
 
-    # Pagination (URL contains only page; per_page comes from Config/.env)
+    # Pagination: only page comes from the query string.
     page = clamp_pagination_params(request.args.get("page"))
 
     all_items = list_dir(rel_path)
@@ -38,7 +38,7 @@ def browse(rel_path: str = ""):
     pagination = paginate_list(all_items, page=page)
     items = pagination["items"]
 
-    # For every video, create a separate form with its own CSRF token
+    # Bind a per-item delete form so each row has its own CSRF token.
     for item in items:
         if item.get("is_video"):
             form = DeleteVideoForm()
@@ -79,6 +79,7 @@ def delete_video():
         logger.warning("Delete attempt with empty video_path")
         return redirect(url_for("browse.browse")), 400
 
+    # Resolve and validate the requested path under MEDIA_ROOT.
     path = safe_path(rel_path)
 
     if not path.exists() or not path.is_file():

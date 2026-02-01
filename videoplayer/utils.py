@@ -10,11 +10,13 @@ def safe_path(rel_path: str = "") -> Path:
     root = Config.MEDIA_ROOT.resolve()
 
     try:
+        # Resolve to an absolute, existing path and avoid traversal via "..".
         path = (root / rel_path).resolve(strict=True)
     except FileNotFoundError:
         abort(404)
 
     try:
+        # Ensure the resolved path stays within MEDIA_ROOT.
         path.relative_to(root)
     except ValueError:
         abort(404)  # Access outside the allowed area
@@ -42,6 +44,7 @@ def list_dir(rel_path: str = "") -> list[dict]:
         elif p.is_file():
             files.append(entry)
 
+    # Keep directories first, then files, both case-insensitively sorted.
     dirs.sort(key=lambda x: x["name"].lower())
     files.sort(key=lambda x: x["name"].lower())
 
@@ -57,6 +60,7 @@ def next_video(rel_path: str) -> str | None:
         if p.is_file() and p.suffix.lower() in Config.VIDEO_EXTENSIONS
     ]
 
+    # Natural sort so "Episode 10" follows "Episode 9".
     videos = natsorted(videos, key=lambda p: p.name)
 
     try:
@@ -66,7 +70,7 @@ def next_video(rel_path: str) -> str | None:
 
     if idx + 1 < len(videos):
         next_path = str(Path(rel_path).parent / videos[idx + 1].name)
-        # Stelle sicher, dass Forward-Slashes verwendet werden
+        # Normalize for URLs (forward slashes on Windows too).
         return next_path.replace("\\", "/")
 
     return None
@@ -161,6 +165,7 @@ def set_cached_media_size(app=None, total_bytes: int = 0) -> None:
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }
 
+    # Write to a temp file and atomically replace to avoid partial writes.
     tmp.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
     tmp.replace(cache_file)
 
@@ -183,7 +188,7 @@ def cleanup_empty_directories(
             break
 
         try:
-            # If directory is not empty, stop
+            # Stop at the first non-empty directory.
             if any(current.iterdir()):
                 break
 
@@ -235,4 +240,3 @@ def paginate_list(items: list, page: int, per_page: int | None = None) -> dict:
         "prev_page": page - 1 if page > 1 else None,
         "next_page": page + 1 if page < pages else None,
     }
-
