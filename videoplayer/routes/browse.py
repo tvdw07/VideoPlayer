@@ -30,8 +30,13 @@ def browse(rel_path: str = ""):
 
     # Pagination: only page comes from the query string.
     page = clamp_pagination_params(request.args.get("page"))
+    search_query = (request.args.get("q") or "").strip()
 
     all_items = list_dir(rel_path)
+    if search_query:
+        q_lower = search_query.lower()
+        all_items = [item for item in all_items if q_lower in item["name"].lower()]
+
     parent = get_parent_path(rel_path)
     breadcrumbs = get_breadcrumbs(rel_path)
 
@@ -61,6 +66,8 @@ def browse(rel_path: str = ""):
         parent=parent,
         breadcrumbs=breadcrumbs,
         pagination=pagination,
+        search_query=search_query,
+        total_items=len(all_items),
     )
 
 

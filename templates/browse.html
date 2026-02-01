@@ -1,23 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
 
-<h4 class="mb-3">📁 {{ current or "media" }}</h4>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h4 class="mb-0">📁 {{ current or "media" }}</h4>
+
+    <form class="d-flex gap-2" method="get" action="{{ url_for('browse.browse', rel_path=current) }}">
+        <input class="form-control form-control-sm" type="search" name="q" value="{{ search_query }}"
+               placeholder="Suche nach Titel oder Datei" aria-label="Suche">
+        {% if search_query %}
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('browse.browse', rel_path=current) }}">Reset</a>
+        {% endif %}
+        <button class="btn btn-sm btn-outline-info" type="submit">Suche</button>
+    </form>
+</div>
+
+{% if search_query %}
+<small class="text-secondary d-block mb-2">
+    {{ total_items }} Treffer fuer "{{ search_query }}"
+</small>
+{% endif %}
 
 <ul class="list-group">
 
     {% if current %}
     <li class="list-group-item">
-        <a href="{{ url_for('browse.browse', rel_path=parent) }}">← Zurück</a>
+        <a href="{{ url_for('browse.browse', rel_path=parent, q=search_query or None) }}">← Zurück</a>
     </li>
     {% endif %}
 
+    {% if items %}
     {% for item in items %}
     <li class="list-group-item d-flex justify-content-between align-items-center">
 
         <div>
             {% if item.is_dir %}
             <span class="item-dir">📁</span>
-            <a href="{{ url_for('browse.browse', rel_path=item.path) }}" class="item-dir">{{ item.name }}</a>
+            <a href="{{ url_for('browse.browse', rel_path=item.path, q=search_query or None) }}" class="item-dir">{{ item.name }}</a>
 
             {% elif item.is_video %}
             <span class="item-video">▶</span>
@@ -41,6 +59,11 @@
 
     </li>
     {% endfor %}
+    {% else %}
+    <li class="list-group-item text-secondary">
+        Keine Treffer gefunden.
+    </li>
+    {% endif %}
 </ul>
 
 {% if pagination and pagination.pages > 1 %}
@@ -52,12 +75,12 @@
     <ul class="pagination pagination-sm mb-0">
         <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
             <a class="page-link"
-               href="{{ url_for('browse.browse', rel_path=current, page=pagination.prev_page) }}">←</a>
+               href="{{ url_for('browse.browse', rel_path=current, page=pagination.prev_page, q=search_query or None) }}">←</a>
         </li>
 
         <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
             <a class="page-link"
-               href="{{ url_for('browse.browse', rel_path=current, page=pagination.next_page) }}">→</a>
+               href="{{ url_for('browse.browse', rel_path=current, page=pagination.next_page, q=search_query or None) }}">→</a>
         </li>
     </ul>
 </div>
