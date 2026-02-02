@@ -73,6 +73,7 @@ def login_post():
 
 
 @auth_bp.post("/logout")
+@limiter.limit("10 per minute")
 def logout():
     logout_user()
     return redirect(url_for("auth.login"))
