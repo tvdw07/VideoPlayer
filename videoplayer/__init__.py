@@ -42,7 +42,7 @@ def create_app(config: dict | None = None) -> Flask:
     logger.info("CSRF protection initialized")
 
     storage_uri = os.getenv("RATELIMIT_STORAGE_URI", "memory://")
-    if (not app.config.get("DEBUG", False)) and storage_uri.startswith("memory://"):
+    if (not app.config.get("DEBUG", False)) and (not app.config.get("TESTING", False)) and storage_uri.startswith("memory://"):
         logger.warning("RATELIMIT_STORAGE_URI=memory:// in production is unsafe. Use Redis.")
         raise RuntimeError("In production, RATELIMIT_STORAGE_URI must not be memory:// (use Redis).")
 
