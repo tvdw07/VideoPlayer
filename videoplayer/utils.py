@@ -37,7 +37,7 @@ def list_dir(rel_path: str = "") -> list[dict]:
             "name": p.name,
             "is_dir": p.is_dir(),
             "is_video": p.is_file() and p.suffix.lower() in Config.VIDEO_EXTENSIONS,
-            "path": str(Path(rel_path) / p.name),
+            "path": str(Path(rel_path) / p.name).replace("\\", "/"),  # Normalize for URLs
         }
         if p.is_dir():
             dirs.append(entry)
