@@ -1,6 +1,6 @@
 # VideoPlayer
 
-**VideoPlayer** ist eine schlanke Flask-Web-App zum Abspielen **lokaler Video-Dateien** direkt im Browser. Sie richtet sich an typische Serien-/Anime-Ordnerstrukturen (Staffeln/Episoden) und lässt sich unkompliziert **via Docker** oder lokal betreiben.
+**VideoPlayer** ist eine schlanke Flask-Web-App zum Abspielen **lokaler Video-Dateien** direkt im Browser. Sie richtet sich an typische Serien-/Anime-Ordnerstrukturen (Staffeln/Episoden) und wird **via Docker mit PostgreSQL** betrieben.
 
 > ⚠️ **Work in progress:** Die App ist nutzbar, aber UI/Features sind noch im Ausbau und können sich ändern.
 > Feedback, Issues und Pull Requests sind sehr willkommen.
@@ -32,10 +32,20 @@ git clone https://github.com/tvdw07/VideoPlayer.git
 cd VideoPlayer
 ```
 
-2. `.env` anlegen (mindestens `SECRET_KEY` setzen)
+2. `.env` anlegen und konfigurieren
 
 ```bash
 touch .env
+```
+
+Setze mindestens folgende Variablen (oder nutze die Defaults):
+
+```env
+SECRET_KEY=your-secret-key-here
+POSTGRES_USER=videoplayer
+POSTGRES_PASSWORD=change-me
+POSTGRES_DB=videoplayer
+PORT=8000
 ```
 
 3. Container bauen & starten
@@ -52,46 +62,34 @@ docker compose up --build
 
 ---
 
-## Installation (lokal, ohne Docker)
+## Systemanforderungen
 
-**Voraussetzungen:** Python (empfohlen: 3.11+), `pip`
+Die App wird ausschließlich via Docker mit PostgreSQL betrieben. Folgende Komponenten werden benötigt:
 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-Lege anschließend eine `.env` an und setze mindestens `SECRET_KEY` (siehe Konfiguration).
-
-Start (Dev):
-
-```bash
-python run.py
-```
-
-Alternativ „prod-nah“ (wie im Container typischerweise):
-
-```bash
-gunicorn -b 0.0.0.0:8000 wsgi:app
-```
+- **Docker** (Version 20.10+)
+- **Docker Compose** (Version 1.29+)
+- Mindestens **512 MB freier RAM** (empfohlen: 1 GB+)
+- PostgreSQL wird im Container automatisch bereitgestellt
 
 ---
 
-## Konfiguration
 
-Die App nutzt Umgebungsvariablen (optional aus einer `.env`). Welche Werte verfügbar sind, ist in `videoplayer/config.py` definiert.
+Die App nutzt Umgebungsvariablen aus einer `.env`-Datei. Die verfügbaren Optionen sind in `videoplayer/config.py` dokumentiert.
 
-**Wichtige Variablen (Auswahl):**
+**Erforderliche Variablen:**
 
-- `SECRET_KEY` (**Pflicht**) – Session/CSRF-Schutz
-- `MEDIA_ROOT` – Pfad zur Medienbibliothek (Standard: `media/` im Projekt)
-- `HOST` / `PORT` – Bind-Adresse und Port (Docker nutzt i.d.R. `:8000`)
-- `DEBUG` – Debug-Modus (nur lokal)
-- `DEFAULT_PER_PAGE` – Pagination-Größe in der Browse-Ansicht
-- `RATE_LIMIT_ENABLED` – Rate Limiting aktivieren/deaktivieren
+- `SECRET_KEY` – Session/CSRF-Schutz
+- `POSTGRES_DB` – PostgreSQL Datenbank-Name (Standard: `videoplayer`)
+- `POSTGRES_USER` – PostgreSQL Benutzername (Standard: `videoplayer`)
+- `POSTGRES_PASSWORD` – PostgreSQL Passwort (Standard: `change-me`)
 
-Tipp: Wenn du die App im Heimnetz erreichbar machen willst, setze `HOST=0.0.0.0` und beachte die Security-Hinweise unten.
+**Optionale Variablen:**
+
+- `PORT` – Port der App (Standard: `8000`)
+- `HOST` – Bind-Adresse (Standard: `0.0.0.0`)
+- `MEDIA_ROOT` – Pfad zur Medienbibliothek (Standard: `media/`)
+- `DEFAULT_PER_PAGE` – Pagination-Größe (Standard: `12`)
+- `RATE_LIMIT_ENABLED` – Rate Limiting aktivieren (Standard: `true`)
 
 ---
 
@@ -141,7 +139,6 @@ Wenn du die App öffentlich betreiben willst, sind vorgeschaltet z.B. HTTPS, ein
 - 🧪 Mehr Tests
 - ⚙️ Erweiterte Einstellungen
 - 🎨 Design-Update (optional)
-- 🗃️ Umstellung von SQLite auf PostgreSQL inkl. Docker-Compose (App + DB + Redis)
 - ⬆️ Optional: Uploads auf den Server erlauben
 
 ---
