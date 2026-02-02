@@ -4,8 +4,27 @@ services:
     image: videoplayer
     ports:
       - "${PORT:-8000}:8000"
-    volumes:
-      - ./media:/app/media
     env_file:
       - .env
+    volumes:
+      - ./media:/app/media
+      - videoplayer_instance:/app/instance
     restart: unless-stopped
+
+    # Security hardening
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/login').read()"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  videoplayer_instance:

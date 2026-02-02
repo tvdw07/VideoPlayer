@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, current_app, redirect, url_for, re
 
 from .. import limiter
 from ..config import Config
+from ..security import auth_required
 from ..utils import (
     calculate_media_size,
     format_size,
@@ -45,6 +46,7 @@ def _write_env_lines(env_path: Path, lines: list[str]) -> None:
 
 @settings_bp.route("/settings")
 @limiter.limit("10 per minute")
+@auth_required
 def index():
     cached = get_cached_media_size(current_app)
     total_bytes = cached["bytes"] if cached else None
@@ -62,6 +64,7 @@ def index():
 
 @settings_bp.route("/settings/update", methods=["POST"])
 @limiter.limit("5 per minute")
+@auth_required
 def update_settings():
     cleanup_enabled = request.form.get("cleanup_empty_directories") == "on"
     per_page_raw = (request.form.get("default_per_page") or "").strip()
@@ -98,6 +101,7 @@ def update_settings():
 
 @settings_bp.route("/settings/recalculate", methods=["POST"])
 @limiter.limit("5 per minute")
+@auth_required
 def recalculate():
     total_bytes = calculate_media_size()
     set_cached_media_size(current_app, total_bytes)

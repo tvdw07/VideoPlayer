@@ -79,3 +79,23 @@ class Config:
         raise ValueError("DEFAULT_PER_PAGE must be >= 1")
 
     logger.info(f"DEFAULT_PER_PAGE: {DEFAULT_PER_PAGE}")
+
+    # --- Auth feature flag ---
+    AUTH_ENABLED = _env_bool("AUTH_ENABLED", True)
+
+    # --- Database ---
+    SQLALCHEMY_DATABASE_URI = os.getenv(
+        "DATABASE_URL",
+        f"sqlite:///{(BASE_DIR / 'instance' / 'app.db').as_posix()}",
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # --- Session/Cookie security (prod defaults) ---
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = os.getenv("SESSION_COOKIE_SAMESITE", "Lax")
+
+    # In Prod MUSS Secure True sein (requires HTTPS)
+    SESSION_COOKIE_SECURE = _env_bool("SESSION_COOKIE_SECURE", not DEBUG)
+
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SECURE = _env_bool("REMEMBER_COOKIE_SECURE", not DEBUG)
