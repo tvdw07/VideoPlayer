@@ -1,18 +1,20 @@
 # VideoPlayer
 
-**VideoPlayer** ist eine kompakte Flask-Web-App zum Abspielen **lokaler Video-Dateien** direkt im Browser. Sie ist auf typische Serien-/Anime-Ordnerstrukturen ausgelegt (Staffeln/Episoden) und kann unkompliziert **via Docker** oder lokal betrieben werden.
+**VideoPlayer** ist eine schlanke Flask-Web-App zum Abspielen **lokaler Video-Dateien** direkt im Browser. Sie richtet sich an typische Serien-/Anime-Ordnerstrukturen (Staffeln/Episoden) und lässt sich unkompliziert **via Docker** oder lokal betreiben.
 
 > ⚠️ **Work in progress:** Die App ist nutzbar, aber UI/Features sind noch im Ausbau und können sich ändern.
-> Feedback, Issues und Pull Requests sind sehr willkommen – **help is appreciated** 🙌
+> Feedback, Issues und Pull Requests sind sehr willkommen.
 
 ---
 
 ## Features (aktuell)
 
-- 📚 **Bibliothek/Browse**: Medien unter `media/` browsen (inkl. Pagination)
+- 📚 **Bibliothek/Browse**: Medien unter `media/` durchsuchen (inkl. Pagination)
+- 🔎 **Suche**: Titel- und Dateinamen-Suche
 - 🎬 **Watch-Seite**: Wiedergabe im Browser (Frontend via Video.js)
+- 👤 **Authentifizierung**: Login-geschützte Nutzung
+- 🗄️ **Datenbank**: Persistenz für App-Daten
 - 🧩 **Modularer Aufbau**: Blueprints, Utils und Config getrennt
-- 💾 **Persistenz ohne Datenbank**: z.B. Cache für Mediengrößen (`instance/media_size_cache.json`)
 - 🐳 **Docker-ready**: schneller Start über `docker compose`
 
 **Hinweis:** Es findet **kein Transcoding** statt („Direct Play“). Ob ein Video abspielbar ist, hängt von den Codecs deines Browsers ab.
@@ -87,7 +89,7 @@ Die App nutzt Umgebungsvariablen (optional aus einer `.env`). Welche Werte verf�
 - `HOST` / `PORT` – Bind-Adresse und Port (Docker nutzt i.d.R. `:8000`)
 - `DEBUG` – Debug-Modus (nur lokal)
 - `DEFAULT_PER_PAGE` – Pagination-Größe in der Browse-Ansicht
-- `RATE_LIMIT_ENABLED` – aktivieren/deaktivieren von Rate Limiting
+- `RATE_LIMIT_ENABLED` – Rate Limiting aktivieren/deaktivieren
 
 Tipp: Wenn du die App im Heimnetz erreichbar machen willst, setze `HOST=0.0.0.0` und beachte die Security-Hinweise unten.
 
@@ -119,22 +121,28 @@ Die Erkennung ist auf Serien-/Episodenmuster ausgelegt (z.B. `S01E001`).
 
 ## Security / Betriebshinweise
 
-- 🔒 **Fürs Heimnetz gedacht:** Es gibt aktuell **keine Benutzerverwaltung/Authentifizierung**. Bitte nicht unverändert öffentlich ins Internet exponieren.
+- 🔒 **Fürs Heimnetz gedacht:** Es gibt Authentifizierung, aber bitte nicht unverändert öffentlich ins Internet exponieren.
 - 🧷 **`SECRET_KEY` setzen:** erforderlich für sichere Sessions/CSRF.
 - 🧭 **Pfadvalidierung:** Routen sollten nur innerhalb von `MEDIA_ROOT` auf echte Dateien zugreifen (Schutz vor Directory Traversal).
 - ⏱️ **Rate Limiting:** kann (je nach Konfiguration) aktiv sein und hilft gegen Missbrauch.
 
-Wenn du die App öffentlich betreiben willst, sind vorgeschaltet z.B. Authentifizierung (Reverse Proxy), HTTPS und ein restriktives Netz-/Firewall-Setup empfehlenswert.
+Wenn du die App öffentlich betreiben willst, sind vorgeschaltet z.B. HTTPS, ein restriktives Netz-/Firewall-Setup und ggf. zusätzlicher Reverse-Proxy-Schutz empfehlenswert.
 
 ---
 
 ## Roadmap (Auswahl)
 
-- 🔎 Suche über Titel/Dateinamen
+- ⏯️ Wiedergabefortschritt in der DB speichern (wie weit wurde geschaut)
+- 🛡️ Erweiterte Brute-Force-Protection mit DB-Unterstuetzung
+- ⚡ Limiter auf Redis upgraden und Redis ins Docker-Image integrieren
+- 🧑‍💼 Admin-Dashboard fuer mehrere Nutzer
+- 🧾 Erweitertes Logging
+- 🧠 Bessere Lesbarkeit durch mehr Kommentare
+- 🧪 Mehr Tests
 - ⚙️ Erweiterte Einstellungen
-- 🗄️ Persistente Speicherung via Datenbank
-- 👤 Benutzerverwaltung / Authentifizierung
-- 🧪 Mehr Tests und CI/CD
+- 🎨 Design-Update (optional)
+- 🗃️ Umstellung von SQLite auf PostgreSQL inkl. Docker-Compose (App + DB + Redis)
+- ⬆️ Optional: Uploads auf den Server erlauben
 
 ---
 
