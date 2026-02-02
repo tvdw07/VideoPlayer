@@ -73,6 +73,7 @@ Die App wird ausschließlich via Docker mit PostgreSQL betrieben. Folgende Kompo
 
 ---
 
+## Konfiguration
 
 Die App nutzt Umgebungsvariablen aus einer `.env`-Datei. Die verfügbaren Optionen sind in `videoplayer/config.py` dokumentiert.
 
@@ -90,6 +91,7 @@ Die App nutzt Umgebungsvariablen aus einer `.env`-Datei. Die verfügbaren Option
 - `MEDIA_ROOT` – Pfad zur Medienbibliothek (Standard: `media/`)
 - `DEFAULT_PER_PAGE` – Pagination-Größe (Standard: `12`)
 - `RATE_LIMIT_ENABLED` – Rate Limiting aktivieren (Standard: `true`)
+- `REDIS_URL` – Redis-Verbindung für den Limiter (z.B. `redis://redis:6379/0`)
 
 ---
 
@@ -122,7 +124,7 @@ Die Erkennung ist auf Serien-/Episodenmuster ausgelegt (z.B. `S01E001`).
 - 🔒 **Fürs Heimnetz gedacht:** Es gibt Authentifizierung, aber bitte nicht unverändert öffentlich ins Internet exponieren.
 - 🧷 **`SECRET_KEY` setzen:** erforderlich für sichere Sessions/CSRF.
 - 🧭 **Pfadvalidierung:** Routen sollten nur innerhalb von `MEDIA_ROOT` auf echte Dateien zugreifen (Schutz vor Directory Traversal).
-- ⏱️ **Rate Limiting:** kann (je nach Konfiguration) aktiv sein und hilft gegen Missbrauch.
+- ⏱️ **Rate Limiting:** Der Limiter arbeitet mit Redis und hilft gegen Missbrauch.
 
 Wenn du die App öffentlich betreiben willst, sind vorgeschaltet z.B. HTTPS, ein restriktives Netz-/Firewall-Setup und ggf. zusätzlicher Reverse-Proxy-Schutz empfehlenswert.
 
