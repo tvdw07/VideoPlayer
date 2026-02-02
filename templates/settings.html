@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="container py-4">
+<div class="container py-4 settings-page">
 
     <div class="d-flex align-items-center mb-4">
         <span class="fs-3 me-2">⚙️</span>
@@ -13,12 +13,14 @@
             <form method="post" action="{{ url_for('settings.update_settings') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                <div class="d-flex justify-content-between flex-wrap gap-3">
-                    <div>
-                        <small class="text-uppercase text-secondary">
-                            Aufraeumen nach Loeschung
+                <div class="row g-4 align-items-start">
+                    <!-- Cleanup -->
+                    <div class="col-12 col-md-7">
+                        <small class="text-uppercase text-secondary d-block mb-2">
+                            Aufräumen nach Löschung
                         </small>
-                        <div class="form-check mt-2">
+
+                        <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="cleanupToggle"
                                    name="cleanup_empty_directories"
                                    {% if cleanup_enabled %}checked{% endif %}>
@@ -26,21 +28,35 @@
                                 Leere Ordner automatisch entfernen
                             </label>
                         </div>
+
+                        <small class="text-secondary d-block mt-2">
+                            Entfernt Ordner, sobald sie nach dem Löschen leer sind.
+                        </small>
                     </div>
 
-                    <div class="text-end">
-                        <small class="text-uppercase text-secondary">
-                            Eintraege pro Seite
+                    <!-- Per page -->
+                    <div class="col-12 col-md-5">
+                        <small class="text-uppercase text-secondary d-block mb-2 text-md-end">
+                            Einträge pro Seite
                         </small>
-                        <input class="form-control form-control-sm mt-2 text-end"
-                               type="number" min="1" name="default_per_page"
-                               value="{{ default_per_page }}" style="max-width: 160px;">
+
+                        <div class="d-flex justify-content-md-end">
+                            <input class="form-control form-control-sm text-end"
+                                   type="number" min="1" name="default_per_page"
+                                   value="{{ default_per_page }}" style="max-width: 180px;">
+                        </div>
+
+                        <small class="text-secondary d-block mt-2 text-md-end">
+                            Gilt für Browse-Listen & Suche.
+                        </small>
                     </div>
                 </div>
 
-                <button class="btn btn-outline-light mt-3">
-                    Speichern
-                </button>
+                <div class="d-flex justify-content-end mt-4">
+                    <button class="btn btn-outline-light">
+                        Speichern
+                    </button>
+                </div>
             </form>
         </div>
     </div>

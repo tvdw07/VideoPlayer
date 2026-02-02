@@ -7,6 +7,14 @@ a {
     text-decoration: none;
 }
 
+/* Inputs on dark backgrounds */
+.form-control,
+.form-control-sm {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.92);
+}
+
 /* List / Browse */
 .list-group-item {
     cursor: pointer;
@@ -74,7 +82,7 @@ a {
     color: #fff;
 }
 
-/* Cards */
+/* Cards (global) */
 .card {
     border-radius: 12px;
 }
@@ -88,7 +96,7 @@ a {
     transform: translateY(-1px);
 }
 
-/* Settings: Storage Highlight */
+/* Settings: Storage Highlight (global base, settings page overrides add clarity) */
 .storage-value {
     font-size: clamp(2.8rem, 5vw, 3.6rem);
     font-weight: 700;
@@ -101,4 +109,88 @@ a {
     font-size: 0.45em;
     color: rgba(255, 255, 255, 0.6);
     margin-left: 0.15em;
+}
+
+/* =========================================================
+   Settings page contrast upgrades (SCOPED)
+   Add `.settings-page` to the page container:
+   <div class="container py-4 settings-page">
+   ========================================================= */
+
+.settings-page .card {
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.settings-page .card .card-body {
+    color: rgba(255, 255, 255, 0.88);
+}
+
+.settings-page .text-secondary {
+    color: rgba(255, 255, 255, 0.62) !important;
+}
+
+.settings-page small.text-uppercase {
+    letter-spacing: 0.08em;
+}
+
+.settings-page hr {
+    border-color: rgba(255, 255, 255, 0.10);
+    opacity: 1;
+}
+
+/* Inputs on dark backgrounds */
+.settings-page .form-control,
+.settings-page .form-control-sm {
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.settings-page .form-control::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.settings-page .form-control:focus,
+.settings-page .form-control-sm:focus {
+    background: rgba(0, 0, 0, 0.45);
+    border-color: rgba(109, 220, 255, 0.65);
+    box-shadow: 0 0 0 0.2rem rgba(109, 220, 255, 0.18);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+/* Checkbox visibility on dark UI */
+.settings-page .form-check-input {
+    background-color: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+}
+
+.settings-page .form-check-input:checked {
+    background-color: #6ddcff;
+    border-color: rgba(109, 220, 255, 0.9);
+}
+
+.settings-page .form-check-label {
+    color: rgba(255, 255, 255, 0.88);
+}
+
+/* Buttons in settings: keep outline but boost clarity */
+.settings-page .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.28);
+    color: rgba(255, 255, 255, 0.90);
+}
+
+.settings-page .btn-outline-light:hover {
+    border-color: rgba(109, 220, 255, 0.55);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+}
+
+/* Storage highlight: subtle clarity */
+.settings-page .storage-value {
+    font-weight: 750;
+    text-shadow: 0 0 22px rgba(109, 220, 255, 0.10);
 }
