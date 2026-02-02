@@ -14,11 +14,26 @@ services:
       retries: 5
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    command: [ "redis-server", "--save", "60", "1", "--appendonly", "yes" ]
+    volumes:
+      - videoplayer_redisdata:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+
   videoplayer:
     build: .
     image: videoplayer
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     ports:
       - "${PORT:-8000}:8000"
@@ -47,3 +62,4 @@ services:
 volumes:
   videoplayer_instance:
   videoplayer_pgdata:
+  videoplayer_redisdata:
