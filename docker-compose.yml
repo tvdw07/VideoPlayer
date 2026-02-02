@@ -1,7 +1,25 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-videoplayer}
+      POSTGRES_USER: ${POSTGRES_USER:-videoplayer}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    volumes:
+      - videoplayer_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
   videoplayer:
     build: .
     image: videoplayer
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports:
       - "${PORT:-8000}:8000"
     env_file:
@@ -28,3 +46,4 @@ services:
 
 volumes:
   videoplayer_instance:
+  videoplayer_pgdata:
