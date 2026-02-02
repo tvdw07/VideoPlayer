@@ -134,7 +134,6 @@ Wenn du die App öffentlich betreiben willst, sind vorgeschaltet z.B. HTTPS, ein
 
 - ⏯️ Wiedergabefortschritt in der DB speichern (wie weit wurde geschaut)
 - 🛡️ Erweiterte Brute-Force-Protection mit DB-Unterstuetzung
-- ⚡ Limiter auf Redis upgraden und Redis ins Docker-Image integrieren
 - 🧑‍💼 Admin-Dashboard fuer mehrere Nutzer
 - 🧾 Erweitertes Logging
 - 🧠 Bessere Lesbarkeit durch mehr Kommentare
