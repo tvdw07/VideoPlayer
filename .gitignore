@@ -1,3 +1,5 @@
 /.env
 /TODO
-/instance/media_size_cache.json
+/instance
+/media
+/migrations
