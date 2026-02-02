@@ -105,6 +105,27 @@ def format_size(num_bytes: int) -> str:
     # Fallback; should not be reached
     return f"{size:.2f} {units[-1]}"
 
+def format_cached_timestamp(iso_ts: str | None) -> str | None:
+    """
+    Convert ISO timestamp like '2026-02-02T09:16:17.333766+00:00'
+    into something UI-friendly in local time.
+    Output: '02.02.2026 · 10:16'
+    """
+    if not iso_ts:
+        return None
+
+    from datetime import datetime
+
+    try:
+        dt = datetime.fromisoformat(iso_ts)
+        # If timezone-aware, convert to local time; if naive, leave as is
+        if dt.tzinfo is not None:
+            dt = dt.astimezone()
+        return dt.strftime("%d.%m.%Y · %H:%M")
+    except ValueError:
+        return None
+
+
 
 def _media_size_cache_path(app=None) -> Path:
     """Path to the cache file (persistent in the instance folder)."""
