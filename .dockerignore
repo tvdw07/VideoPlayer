@@ -1,9 +1,8 @@
-__pycache__/
-*.py[cod]
-.env
 .git
-.idea
-.vscode
-media/*
-!media/.gitkeep
-tests/
+__pycache__/
+*.pyc
+.env
+media/
+instance/
+migrations/versions/__pycache__/
+venv/

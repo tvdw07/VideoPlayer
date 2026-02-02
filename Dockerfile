@@ -1,28 +1,25 @@
 FROM python:3.11-slim
 
-# ---- System ----
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# ---- User (Security!) ----
-RUN useradd -m appuser
+# Create non-root user
+RUN useradd -m -u 10001 appuser
 
-# ---- Dependencies ----
+# Install deps first (better build cache)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# ---- App Code ----
+# Copy app code
 COPY . .
 
-# ---- Media Dir ----
-RUN mkdir -p /app/media && \
+# Ensure writable dirs (only what you need)
+RUN mkdir -p /app/media /app/instance && \
     chown -R appuser:appuser /app
 
 USER appuser
-
 EXPOSE 8000
 
-# ---- Start ----
-CMD ["gunicorn", "-w", "2", "-k", "gthread", "--threads", "4", "-b", "0.0.0.0:8000", "wsgi:app"]
+CMD ["gunicorn", "-w", "2", "-k", "gthread", "--threads", "4", "--timeout", "90", "--graceful-timeout", "30", "--access-logfile", "-", "--error-logfile", "-", "--max-requests", "2000", "--max-requests-jitter", "200", "-b", "0.0.0.0:8000", "wsgi:app"]
