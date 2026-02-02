@@ -22,10 +22,22 @@
             Local Media
         </a>
 
-        <a class="btn btn-sm btn-outline-info" href="{{ url_for('settings.index') }}">
-            Settings
-        </a>
+        <div class="d-flex align-items-center gap-2">
+            <a class="btn btn-sm btn-outline-info" href="{{ url_for('settings.index') }}">
+                Settings
+            </a>
+
+            {% if config.get("AUTH_ENABLED", True) and current_user.is_authenticated %}
+            <form method="post" action="{{ url_for('auth.logout') }}" class="d-inline">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-light">
+                    Logout
+                </button>
+            </form>
+            {% endif %}
+        </div>
     </div>
+
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
