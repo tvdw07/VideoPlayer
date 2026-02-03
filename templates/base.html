@@ -54,16 +54,7 @@
     {% block content %}{% endblock %}
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.alert').forEach(alert => {
-            setTimeout(() => {
-                alert.style.opacity = '0';
-                setTimeout(() => alert.remove(), 400);
-            }, 3000);
-        });
-    });
-</script>
+<script src="{{ url_for('static', filename='js/base.js') }}"></script>
 
 </body>
 </html>
