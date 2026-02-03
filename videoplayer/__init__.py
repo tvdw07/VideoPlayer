@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 from flask import Flask, redirect, request, url_for, render_template
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from .extensions import csrf, limiter, db, migrate, login_manager
 from .config import Config
@@ -101,12 +102,28 @@ def create_app(config: dict | None = None) -> Flask:
         resp.headers.setdefault("Referrer-Policy", "no-referrer")
         resp.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
 
-        # HSTS only when HTTPS is actually used
-        if not app.config.get("DEBUG", False) and request.is_secure:
-            resp.headers.setdefault(
-                "Strict-Transport-Security",
-                "max-age=31536000; includeSubDomains"
-            )
+        # --- CSP (start with Report-Only) ---
+        csp = (
+            "default-src 'self'; "
+            "base-uri 'self'; "
+            "object-src 'none'; "
+            "frame-ancestors 'none'; "
+            "form-action 'self'; "
+            "img-src 'self' data:; "
+            "font-src 'self' data:; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://vjs.zencdn.net; "
+            "script-src 'self' https://vjs.zencdn.net; "
+            "media-src 'self'; "
+            "connect-src 'self'; "
+            "upgrade-insecure-requests"
+        )
+
+        # Report-Only first (safe rollout)
+        resp.headers.setdefault("Content-Security-Policy", csp)
+
+        # Optional: if you already have HTTPS everywhere, keep this:
+        # if not app.config.get("DEBUG", False) and request.is_secure:
+        #     resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
 
         return resp
 
@@ -125,4 +142,5 @@ def create_app(config: dict | None = None) -> Flask:
     logger.info("Flask application created and configured")
     logger.debug(f"Media root: {app.config.get('MEDIA_ROOT')}" )
 
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
     return app
