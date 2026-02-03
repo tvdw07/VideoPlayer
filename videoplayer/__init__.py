@@ -93,6 +93,23 @@ def create_app(config: dict | None = None) -> Flask:
     app.register_blueprint(health_bp)
     logger.info("Blueprints registered")
 
+    # Security headers
+    @app.after_request
+    def set_security_headers(resp):
+        resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+        resp.headers.setdefault("X-Frame-Options", "DENY")
+        resp.headers.setdefault("Referrer-Policy", "no-referrer")
+        resp.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+
+        # HSTS only when HTTPS is actually used
+        if not app.config.get("DEBUG", False) and request.is_secure:
+            resp.headers.setdefault(
+                "Strict-Transport-Security",
+                "max-age=31536000; includeSubDomains"
+            )
+
+        return resp
+
     logger.info("Flask application created and configured")
     logger.debug(f"Media root: {app.config.get('MEDIA_ROOT')}" )
 
