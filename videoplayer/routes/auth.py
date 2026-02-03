@@ -69,7 +69,7 @@ def login_post():
         flash(generic_err, "danger")
         return redirect(url_for("auth.login", next=next_url))
 
-    # Common is verify_password(plain_password, stored_hash).
+    # Verify password
     if not verify_password(user.password_hash, password):
         user.register_failed_login()
         db.session.commit()
