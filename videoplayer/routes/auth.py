@@ -27,10 +27,10 @@ def is_safe_redirect(target: str) -> bool:
 @limiter.limit("10 per minute")
 def login():
     if not current_app.config.get("AUTH_ENABLED", True):
-        return redirect(url_for("browse.index"))
+        return redirect(url_for("browse.browse"))
 
     if current_user.is_authenticated:
-        return redirect(url_for("browse.index"))
+        return redirect(url_for("browse.browse"))
 
     return render_template("login.html")
 
