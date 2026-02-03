@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from flask import Flask, redirect, request, url_for
+from flask import Flask, redirect, request, url_for, render_template
 
 from .extensions import csrf, limiter, db, migrate, login_manager
 from .config import Config
@@ -109,6 +109,18 @@ def create_app(config: dict | None = None) -> Flask:
             )
 
         return resp
+
+    @app.errorhandler(404)
+    def not_found(e):
+        return render_template("errors/404.html"), 404
+
+    @app.errorhandler(500)
+    def internal_error(e):
+        try:
+            db.session.rollback()
+        except Exception:
+            pass
+        return render_template("errors/500.html"), 500
 
     logger.info("Flask application created and configured")
     logger.debug(f"Media root: {app.config.get('MEDIA_ROOT')}" )
