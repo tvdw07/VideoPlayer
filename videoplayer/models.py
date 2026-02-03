@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+import os
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from flask_login import UserMixin
@@ -12,6 +13,9 @@ from .extensions import db
 
 def utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+MAX_FAILED_LOGINS = int(os.getenv("MAX_FAILED_LOGINS", "5"))
+LOCK_MINUTES = int(os.getenv("LOCK_MINUTES", "15"))
 
 
 class User(db.Model, UserMixin):
@@ -56,3 +60,18 @@ class User(db.Model, UserMixin):
         if self.locked_until is not None and self.locked_until > utcnow():
             return False
         return True
+
+    def register_failed_login(self) -> None:
+        """Increase failed login counter and lock account if threshold reached."""
+        if self.locked_until is not None and self.locked_until > utcnow():
+            return
+
+        self.failed_login_count += 1
+        if self.failed_login_count >= MAX_FAILED_LOGINS:
+            self.locked_until = utcnow() + timedelta(minutes=LOCK_MINUTES)
+
+    def register_successful_login(self) -> None:
+        """Reset brute-force protection fields on successful login."""
+        self.failed_login_count = 0
+        self.locked_until = None
+        self.last_login_at = utcnow()
