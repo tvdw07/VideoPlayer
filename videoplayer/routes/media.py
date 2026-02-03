@@ -19,5 +19,5 @@ def media(rel_path: str):
     logger.debug(f"Media file request: {rel_path}")
     path = safe_path(rel_path)
     logger.info(f"Serving media file: {rel_path}")
-    return send_file(path, conditional=True, as_attachment=False)
+    return send_file(path, conditional=True)
 

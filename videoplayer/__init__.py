@@ -12,6 +12,7 @@ from .models import User
 from .routes.auth import auth_bp
 
 from .routes.browse import browse_bp
+from .routes.health import health_bp
 from .routes.watch import watch_bp
 from .routes.media import media_bp
 from .routes.settings import settings_bp
@@ -89,6 +90,7 @@ def create_app(config: dict | None = None) -> Flask:
     app.register_blueprint(media_bp)
     app.register_blueprint(settings_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(health_bp)
     logger.info("Blueprints registered")
 
     logger.info("Flask application created and configured")

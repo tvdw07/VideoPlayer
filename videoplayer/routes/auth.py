@@ -39,12 +39,18 @@ def login():
 @limiter.limit("5 per minute")
 def login_post():
     if not current_app.config.get("AUTH_ENABLED", True):
-        return redirect(url_for("browse.index"))
+        return redirect(url_for("browse.browse"))
 
     username = (request.form.get("username") or "").strip()
     password = request.form.get("password") or ""
     remember = bool(request.form.get("remember"))
     next_url = request.form.get("next") or request.args.get("next") or ""
+
+    generic_err = "Login fehlgeschlagen."
+
+    if not username or not password:
+        flash(generic_err, "danger")
+        return redirect(url_for("auth.login", next=next_url))
 
     # Case-insensitive lookup
     user = (
@@ -53,15 +59,25 @@ def login_post():
         .one_or_none()
     )
 
-    # Generic message to avoid account enumeration
-    if user is None or (not user.can_login()) or (not verify_password(user.password_hash, password)):
-        flash("Login fehlgeschlagen.", "danger")
+    # If user doesn't exist: generic error
+    if user is None:
+        flash(generic_err, "danger")
         return redirect(url_for("auth.login", next=next_url))
 
-    # Successful login: reset counters (optional, but good)
-    user.failed_login_count = 0
-    user.locked_until = None
-    user.last_login_at = db.func.now()
+    # If user exists but is locked/disabled:
+    if not user.can_login():
+        flash(generic_err, "danger")
+        return redirect(url_for("auth.login", next=next_url))
+
+    # Common is verify_password(plain_password, stored_hash).
+    if not verify_password(user.password_hash, password):
+        user.register_failed_login()
+        db.session.commit()
+        flash(generic_err, "danger")
+        return redirect(url_for("auth.login", next=next_url))
+
+    # SUCCESS
+    user.register_successful_login()
     db.session.commit()
 
     login_user(user, remember=remember)
