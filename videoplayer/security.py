@@ -28,7 +28,7 @@ def hash_password(password: str) -> str:
     try:
         return _ph.hash(password)
     except HashingError as e:
-        raise RuntimeError("Password hashing failed +due to an internal error") from e
+        raise RuntimeError("Password hashing failed due to an internal error") from e
 
 def verify_password(password_hash: str, password: str) -> bool:
     try:
