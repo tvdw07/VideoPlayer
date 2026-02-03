@@ -35,7 +35,8 @@
         <div>
             {% if item.is_dir %}
             <span class="item-dir">📁</span>
-            <a href="{{ url_for('browse.browse', rel_path=item.path, q=search_query or None) }}" class="item-dir">{{ item.name }}</a>
+            <a href="{{ url_for('browse.browse', rel_path=item.path, q=search_query or None) }}" class="item-dir">{{
+                item.name }}</a>
 
             {% elif item.is_video %}
             <span class="item-video">▶</span>
@@ -47,14 +48,16 @@
         </div>
 
         {% if item.is_video and item.form %}
-        <form method="post" action="{{ url_for('browse.delete_video') }}"
-              onsubmit="return confirm('Video wirklich löschen?');">
+        <form method="post"
+              action="{{ url_for('browse.delete_video') }}"
+              data-confirm="Video wirklich löschen?">
             {{ item.form.hidden_tag() }}
             {{ item.form.video_path }}
             <button type="submit" class="btn btn-sm btn-outline-danger">
                 Löschen
             </button>
         </form>
+
         {% endif %}
 
     </li>
