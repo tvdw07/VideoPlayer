@@ -3,7 +3,7 @@
 
 <div class="position-relative">
 
-    <a href="/browse/{{ parent }}"
+    <a href="{{ url_for('browse.browse', rel_path=parent) }}"
        class="btn btn-sm text-light position-absolute top-0 start-0 m-2 player-back z-3">
         ← Zurück
     </a>
@@ -16,21 +16,14 @@
            class="video-js vjs-fluid"
            controls
            preload="auto"
-           playsinline>
-
-        <source src="/media/{{ video }}" type="video/mp4">
+           playsinline
+           {% if next_video %}
+           data-next-url="{{ url_for('watch.watch', rel_path=next_video) }}"
+           {% endif %}>
+        <source src="{{ url_for('media.media', rel_path=video) }}" type="video/mp4">
     </video>
 
 </div>
-
-<script>
-const NEXT_URL =
-  {% if next_video %}
-    "/watch/{{ next_video }}"
-  {% else %}
-    null
-  {% endif %}
-</script>
 
 <script src="{{ url_for('static', filename='js/player.js') }}"></script>
 
