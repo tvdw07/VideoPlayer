@@ -16,16 +16,15 @@ services:
 
   redis:
     image: redis:7-alpine
-    command: [ "redis-server", "--save", "60", "1", "--appendonly", "yes" ]
+    command: ["redis-server", "--save", "60", "1", "--appendonly", "yes"]
     volumes:
       - videoplayer_redisdata:/data
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 3s
       retries: 5
     restart: unless-stopped
-
 
   videoplayer:
     build: .
@@ -35,8 +34,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    ports:
-      - "${PORT:-8000}:8000"
     env_file:
       - .env
     volumes:
@@ -54,7 +51,7 @@ services:
       - ALL
 
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health').read()" ]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health').read()"]
       interval: 30s
       timeout: 5s
       retries: 3
