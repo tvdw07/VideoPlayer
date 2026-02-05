@@ -49,7 +49,7 @@ class Config:
     VIDEO_EXTENSIONS: set[str] = {".mp4"}
     logger.info(f"Supported video extensions: {VIDEO_EXTENSIONS}")
 
-    WTF_CSRF_TIME_LIMIT = None
+    WTF_CSRF_TIME_LIMIT = int(os.getenv("WTF_CSRF_TIME_LIMIT", "3600"))
     logger.info(f"CSRF token time limit is set to: {WTF_CSRF_TIME_LIMIT}")
 
     DEBUG = _env_bool("DEBUG", False)

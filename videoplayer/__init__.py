@@ -119,7 +119,7 @@ def create_app(config: dict | None = None) -> Flask:
         )
 
         # Report-Only first (safe rollout)
-        resp.headers.setdefault("Content-Security-Policy-Report-Only", csp)
+        resp.headers.setdefault("Content-Security-Policy", csp)
 
         if not app.config.get("DEBUG", False) and request.is_secure:
             resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
