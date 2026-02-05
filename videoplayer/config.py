@@ -61,17 +61,6 @@ class Config:
     CLEANUP_EMPTY_DIRECTORIES = _env_bool("CLEANUP_EMPTY_DIRECTORIES", False)
     logger.info(f"CLEANUP_EMPTY_DIRECTORIES: {CLEANUP_EMPTY_DIRECTORIES}")
 
-    HOST = os.getenv("HOST", "localhost").strip()
-    allowed_hosts = {"localhost", "0.0.0.0", "127.0.0.1"}
-    if HOST not in allowed_hosts:
-        raise ValueError("HOST must be either 'localhost', '0.0.0.0', or '127.0.0.1'")
-    logger.info(f"HOST: {HOST}")
-
-    PORT = int(os.getenv("PORT", "5000"))
-    if not (1 <= PORT <= 65535):
-        raise ValueError("PORT must be an integer between 1 and 65535")
-    logger.info(f"PORT: {PORT}")
-
     # Pagination (Browse/Search, etc.)
     DEFAULT_PER_PAGE = int(os.getenv("DEFAULT_PER_PAGE", "12"))
 
