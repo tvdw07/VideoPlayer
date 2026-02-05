@@ -3,3 +3,6 @@
 /instance
 /media
 /migrations
+/certs/local/*
+/certs/prod/*
+/nginx/prod.conf
