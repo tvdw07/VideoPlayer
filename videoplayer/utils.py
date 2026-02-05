@@ -8,6 +8,7 @@ from natsort import natsorted
 
 def safe_path(rel_path: str = "") -> Path:
     root = Config.MEDIA_ROOT.resolve()
+    rel_path = rel_path.lstrip("/").replace("\\", "/")
 
     try:
         # Resolve to an absolute, existing path and avoid traversal via "..".
