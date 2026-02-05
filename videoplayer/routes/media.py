@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from flask import Blueprint, send_file
+from flask import Blueprint, Response, abort
 
 from .. import limiter
 from ..security import auth_required
@@ -17,7 +17,18 @@ media_bp = Blueprint("media", __name__)
 @auth_required
 def media(rel_path: str):
     logger.debug(f"Media file request: {rel_path}")
-    path = safe_path(rel_path)
-    logger.info(f"Serving media file: {rel_path}")
-    return send_file(path, conditional=True)
 
+    # 1) Existenz + innerhalb MEDIA_ROOT prüfen (dein safe_path ist gut)
+    _ = safe_path(rel_path)
+
+    # 2) URL-Pfad für nginx-Redirect härten (Windows + Traversal)
+    rel = rel_path.lstrip("/").replace("\\", "/")
+    if not rel or "/../" in f"/{rel}/" or "/./" in f"/{rel}/":
+        abort(404)
+
+    logger.info(f"X-Accel serving media file: {rel}")
+
+    # 3) nginx intern ausliefern lassen
+    resp = Response(status=200)
+    resp.headers["X-Accel-Redirect"] = f"/_protected_media/{rel}"
+    return resp
