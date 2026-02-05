@@ -99,7 +99,7 @@ def create_app(config: dict | None = None) -> Flask:
     def set_security_headers(resp):
         resp.headers.setdefault("X-Content-Type-Options", "nosniff")
         resp.headers.setdefault("X-Frame-Options", "DENY")
-        resp.headers.setdefault("Referrer-Policy", "no-referrer")
+        resp.headers.setdefault("Referrer-Policy", "same-origin")
         resp.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
 
         # --- CSP (start with Report-Only) ---
@@ -119,11 +119,10 @@ def create_app(config: dict | None = None) -> Flask:
         )
 
         # Report-Only first (safe rollout)
-        resp.headers.setdefault("Content-Security-Policy", csp)
+        resp.headers.setdefault("Content-Security-Policy-Report-Only", csp)
 
-        # Optional: if you already have HTTPS everywhere, keep this:
-        # if not app.config.get("DEBUG", False) and request.is_secure:
-        #     resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+        if not app.config.get("DEBUG", False) and request.is_secure:
+            resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
 
         return resp
 
