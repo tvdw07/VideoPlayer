@@ -6,7 +6,13 @@ import pytest
 
 from videoplayer import create_app, User, db
 from videoplayer.security import hash_password
+from videoplayer.models import AppSetting
 
+
+def seed_settings():
+    db.session.merge(AppSetting(key="DEFAULT_PER_PAGE", int_value=12))
+    db.session.merge(AppSetting(key="CLEANUP_EMPTY_DIRECTORIES", bool_value=False))
+    db.session.commit()
 
 def _extract_csrf(html: str) -> str:
     """
@@ -42,6 +48,7 @@ def app(tmp_path: Path):
 
     with app.app_context():
         db.create_all()
+        seed_settings()
         yield app
         db.session.remove()
         db.drop_all()
