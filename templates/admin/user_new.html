@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container py-4 admin-page">
+
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h1 class="h4 mb-1">Admin · Create user</h1>
+      <div class="text-secondary small">Create a new account and assign permissions.</div>
+    </div>
+
+    <a href="{{ url_for('admin.users') }}" class="btn btn-sm btn-outline-secondary">
+      ← Back
+    </a>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold">New user</div>
+
+        <div class="card-body">
+          <form method="post" action="{{ url_for('admin.users_create') }}" class="vstack gap-3">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div>
+              <label class="form-label">Username</label>
+              <input name="username"
+                     class="form-control"
+                     autocomplete="username"
+                     minlength="3" maxlength="64" required>
+              <div class="form-text">3–64 characters. Must be unique.</div>
+            </div>
+
+            <div>
+              <label class="form-label">Password</label>
+              <input name="password"
+                     type="password"
+                     class="form-control"
+                     autocomplete="new-password"
+                     minlength="12" required>
+              <div class="form-text">At least 12 characters (recommend 16+).</div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-4">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="is_active" id="is_active" checked>
+                <label class="form-check-label" for="is_active">Active</label>
+              </div>
+
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="is_admin" id="is_admin">
+                <label class="form-check-label" for="is_admin">Admin</label>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-warning fw-semibold">Create user</button>
+              <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      <div class="card shadow-sm">
+        <div class="card-header fw-semibold">Notes</div>
+        <div class="card-body text-secondary small">
+          <ul class="mb-0">
+            <li>Only admins can access this panel.</li>
+            <li>Keep at least one admin account active.</li>
+            <li>Passwords are stored as Argon2 hashes (never plaintext).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

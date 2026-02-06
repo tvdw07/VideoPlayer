@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container py-4 admin-page">
+
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+    <div>
+      <h1 class="h4 mb-1">Admin · Users</h1>
+      <div class="text-secondary small">Manage accounts, roles and access.</div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('admin.users_new') }}" class="btn btn-sm btn-warning fw-semibold">
+        + New user
+      </a>
+    </div>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-header d-flex flex-wrap align-items-center justify-content-between gap-2">
+      <div class="fw-semibold">All users</div>
+
+      <!-- optional: client-side filter (super simple) -->
+      <div class="input-group input-group-sm" style="max-width: 280px;">
+        <span class="input-group-text">Filter</span>
+        <input id="userFilter" type="text" class="form-control" placeholder="username…">
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0" id="usersTable">
+        <thead>
+          <tr class="text-secondary small">
+            <th style="width: 70px;">ID</th>
+            <th>Username</th>
+            <th style="width: 120px;">Role</th>
+            <th style="width: 120px;">Status</th>
+            <th style="width: 200px;">Created</th>
+            <th style="width: 200px;">Last login</th>
+            <th class="text-end" style="width: 240px;">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+        {% for u in users %}
+          <tr data-username="{{ u.username|lower }}">
+            <td class="text-secondary">{{ u.id }}</td>
+
+            <td>
+              <div class="admin-username">{{ u.username }}</div>
+              <div class="text-secondary small">
+                Failed logins: {{ u.failed_login_count }}
+                {% if u.locked_until %}
+                  · Locked until {{ u.locked_until }}
+                {% endif %}
+              </div>
+            </td>
+
+            <td>
+              {% if u.is_admin %}
+                <span class="badge text-bg-warning">Admin</span>
+              {% else %}
+                <span class="badge text-bg-secondary">User</span>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if u.is_active %}
+                <span class="badge text-bg-success">Active</span>
+              {% else %}
+                <span class="badge text-bg-danger">Disabled</span>
+              {% endif %}
+            </td>
+
+            <td class="text-secondary small">{{ u.created_at }}</td>
+            <td class="text-secondary small">{{ u.last_login_at or "—" }}</td>
+
+            <td class="text-end">
+              <div class="d-flex justify-content-end gap-2 flex-wrap">
+                <!-- Toggle active -->
+                <form method="post" action="{{ url_for('admin.user_toggle_active', user_id=u.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  {% if u.is_active %}
+                    <button class="btn btn-sm btn-outline-danger"
+                            {% if current_user.id == u.id %}disabled title="You cannot deactivate yourself"{% endif %}>
+                      Disable
+                    </button>
+                  {% else %}
+                    <button class="btn btn-sm btn-outline-success">Enable</button>
+                  {% endif %}
+                </form>
+
+                <!-- Toggle admin -->
+                <form method="post" action="{{ url_for('admin.user_toggle_admin', user_id=u.id) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                  {% if u.is_admin %}
+                    <button class="btn btn-sm btn-outline-warning"
+                            {% if current_user.id == u.id %}disabled title="You cannot remove admin from yourself"{% endif %}>
+                      Remove admin
+                    </button>
+                  {% else %}
+                    <button class="btn btn-sm btn-outline-warning">Make admin</button>
+                  {% endif %}
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card-footer text-secondary small">
+      Tip: Keep at least one admin active to avoid lockout.
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/users.js') }}"></script>
+
+</div>
+
+{% endblock %}

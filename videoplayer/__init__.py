@@ -10,6 +10,7 @@ from .extensions import csrf, limiter, db, migrate, login_manager
 from .config import Config
 from .logging import setup_logging
 from .models import User
+from .routes.admin import admin_bp
 from .routes.auth import auth_bp
 
 from .routes.browse import browse_bp
@@ -97,6 +98,7 @@ def create_app(config: dict | None = None) -> Flask:
     app.register_blueprint(settings_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(health_bp)
+    app.register_blueprint(admin_bp)
     logger.info("Blueprints registered")
 
     # Security headers

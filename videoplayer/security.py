@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import current_app, request
+from flask import current_app, request, abort
 from flask_login import current_user
 from flask import redirect, url_for
 from argon2 import PasswordHasher
@@ -19,6 +19,17 @@ def auth_required(view):
 
         # preserve next
         return redirect(url_for("auth.login", next=request.full_path))
+    return wrapped
+
+
+def admin_required(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if not current_user.is_authenticated:
+            abort(401)
+        if not getattr(current_user, "is_admin", False):
+            abort(403)
+        return view(*args, **kwargs)
     return wrapped
 
 

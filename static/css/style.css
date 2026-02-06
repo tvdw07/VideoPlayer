@@ -194,3 +194,140 @@ a {
     font-weight: 750;
     text-shadow: 0 0 22px rgba(109, 220, 255, 0.10);
 }
+
+/* =========================================================
+   Admin pages contrast upgrades (SCOPED)
+   Add `.admin-page` to the page container/wrapper on admin templates
+   Example:
+   <div class="container py-4 admin-page">
+   ========================================================= */
+
+.admin-page {
+    color: rgba(255, 255, 255, 0.92);
+}
+
+.admin-page .card {
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.10) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.admin-page .card-header {
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.92);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.admin-page .card-footer {
+    background: transparent !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.admin-page .card-body {
+    color: rgba(255, 255, 255, 0.88);
+}
+
+.admin-page .text-secondary,
+.admin-page .form-text {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+/* Inputs on admin pages */
+.admin-page .form-control,
+.admin-page .form-control-sm {
+    background: rgba(15, 17, 21, 0.70) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.admin-page .form-control::placeholder,
+.admin-page .form-control-sm::placeholder {
+    color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.admin-page .form-control:focus,
+.admin-page .form-control-sm:focus {
+    background: rgba(15, 17, 21, 0.85) !important;
+    border-color: rgba(109, 220, 255, 0.65) !important;
+    box-shadow: 0 0 0 0.2rem rgba(109, 220, 255, 0.18) !important;
+    color: rgba(255, 255, 255, 0.96) !important;
+}
+
+/* Input group text in admin (Filter label) */
+.admin-page .input-group-text {
+    background: rgba(15, 17, 21, 0.70) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    color: rgba(255, 255, 255, 0.78) !important;
+}
+
+/* Checkbox visibility */
+.admin-page .form-check-input {
+    background-color: rgba(15, 17, 21, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.admin-page .form-check-input:checked {
+    background-color: #6ddcff;
+    border-color: rgba(109, 220, 255, 0.9);
+}
+
+.admin-page .form-check-label {
+    color: rgba(255, 255, 255, 0.90);
+}
+
+/* Buttons: make outline-secondary readable on dark */
+.admin-page .btn-outline-secondary {
+    border-color: rgba(255, 255, 255, 0.28);
+    color: rgba(255, 255, 255, 0.90);
+}
+
+.admin-page .btn-outline-secondary:hover {
+    border-color: rgba(109, 220, 255, 0.55);
+    color: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.25);
+}
+
+/* Admin headings */
+.admin-page h1,
+.admin-page .h4 {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+/* Tables in admin: avoid table-dark “flat grey” */
+.admin-page .table {
+    color: rgba(255, 255, 255, 0.90);
+    margin-bottom: 0;
+}
+
+.admin-page .table thead th {
+    color: rgba(255, 255, 255, 0.78);
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.admin-page .table > :not(caption) > * > * {
+    background: transparent !important; /* kills table-dark backgrounds */
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.admin-page .table-hover > tbody > tr:hover > * {
+    background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.admin-page .table-responsive {
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+/* Badges stay readable on glass */
+.admin-page .badge.text-bg-secondary {
+    background-color: rgba(255, 255, 255, 0.18) !important;
+    color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.admin-page .admin-username {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.97);
+}
