@@ -5,6 +5,8 @@ from flask import abort
 from .config import Config
 from natsort import natsorted
 
+from .settings import get_default_per_page
+
 
 def safe_path(rel_path: str = "") -> Path:
     root = Config.MEDIA_ROOT.resolve()
@@ -239,7 +241,7 @@ def clamp_pagination_params(page: int | str | None) -> int:
 
 def paginate_list(items: list, page: int, per_page: int | None = None) -> dict:
     if per_page is None:
-        per_page = Config.DEFAULT_PER_PAGE
+        per_page = get_default_per_page()
 
     total = len(items)
     pages = max(1, (total + per_page - 1) // per_page)

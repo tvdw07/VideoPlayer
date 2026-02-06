@@ -5,6 +5,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from .. import limiter
 from ..forms import DeleteVideoForm
 from ..security import auth_required
+from ..settings import get_cleanup_empty_directories
 from ..utils import (
     list_dir,
     get_parent_path,
@@ -121,7 +122,7 @@ def delete_video():
     if parent == ".":
         parent = ""
 
-    if Config.CLEANUP_EMPTY_DIRECTORIES:
+    if get_cleanup_empty_directories():
         # Get parent before cleanup in case it gets deleted
         cleanup_parent = path.parent
         removed = cleanup_empty_directories(cleanup_parent)

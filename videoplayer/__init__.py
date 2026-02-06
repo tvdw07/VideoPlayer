@@ -17,6 +17,7 @@ from .routes.health import health_bp
 from .routes.watch import watch_bp
 from .routes.media import media_bp
 from .routes.settings import settings_bp
+from sqlalchemy import text
 
 
 def create_app(config: dict | None = None) -> Flask:
@@ -57,6 +58,10 @@ def create_app(config: dict | None = None) -> Flask:
     logger.info("Database initialized")
     migrate.init_app(app, db)
     logger.info("Database migrations initialized")
+
+    with app.app_context():
+        ensure_default_values_in_db()
+        logger.info("Default values ensured in database")
 
     login_manager.init_app(app)
     login_manager.session_protection = "strong"
@@ -143,3 +148,24 @@ def create_app(config: dict | None = None) -> Flask:
 
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_port=1)
     return app
+
+
+def ensure_default_values_in_db() -> None:
+    # Skip if table not yet present (first run before db upgrade)
+    try:
+        db.session.execute(text("SELECT 1 FROM app_settings LIMIT 1"))
+    except Exception:
+        db.session.rollback()
+        return
+
+    db.session.execute(text("""
+        INSERT INTO app_settings (key, int_value, bool_value, updated_at)
+        VALUES ('DEFAULT_PER_PAGE', 12, NULL, NOW())
+        ON CONFLICT (key) DO NOTHING
+    """))
+    db.session.execute(text("""
+        INSERT INTO app_settings (key, int_value, bool_value, updated_at)
+        VALUES ('CLEANUP_EMPTY_DIRECTORIES', NULL, FALSE, NOW())
+        ON CONFLICT (key) DO NOTHING
+    """))
+    db.session.commit()

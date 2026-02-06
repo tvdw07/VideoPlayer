@@ -56,6 +56,17 @@ services:
       timeout: 5s
       retries: 3
 
+  migrate:
+    image: videoplayer
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    command: [ "flask", "db", "upgrade" ]
+    restart: "no"
+
+
 volumes:
   videoplayer_instance:
   videoplayer_pgdata:

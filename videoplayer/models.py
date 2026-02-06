@@ -5,7 +5,8 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from flask_login import UserMixin
-from sqlalchemy import CheckConstraint, Index, func
+from sqlalchemy import CheckConstraint
+from sqlalchemy import String, Integer, Boolean, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 
 from .extensions import db
@@ -75,3 +76,19 @@ class User(db.Model, UserMixin):
         self.failed_login_count = 0
         self.locked_until = None
         self.last_login_at = utcnow()
+
+
+class AppSetting(db.Model):
+    __tablename__ = "app_settings"
+
+    # only allow known keys (enforced in app logic)
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+
+    # typed storage (so you don't have to parse strings)
+    int_value: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    bool_value: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utcnow, onupdate=utcnow)
+
+    def __repr__(self) -> str:
+        return f"<AppSetting key={self.key!r} int={self.int_value!r} bool={self.bool_value!r}>"

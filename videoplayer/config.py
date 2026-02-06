@@ -58,17 +58,6 @@ class Config:
     RATE_LIMIT_ENABLED = _env_bool("RATE_LIMIT_ENABLED", True)
     logger.info(f"RATE_LIMIT_ENABLED: {RATE_LIMIT_ENABLED}")
 
-    CLEANUP_EMPTY_DIRECTORIES = _env_bool("CLEANUP_EMPTY_DIRECTORIES", False)
-    logger.info(f"CLEANUP_EMPTY_DIRECTORIES: {CLEANUP_EMPTY_DIRECTORIES}")
-
-    # Pagination (Browse/Search, etc.)
-    DEFAULT_PER_PAGE = int(os.getenv("DEFAULT_PER_PAGE", "12"))
-
-    if DEFAULT_PER_PAGE < 1:
-        raise ValueError("DEFAULT_PER_PAGE must be >= 1")
-
-    logger.info(f"DEFAULT_PER_PAGE: {DEFAULT_PER_PAGE}")
-
     # --- Auth feature flag ---
     AUTH_ENABLED = _env_bool("AUTH_ENABLED", True)
 
