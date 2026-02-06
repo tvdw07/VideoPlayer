@@ -72,15 +72,34 @@ openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
 
 **Wichtig:** Dein Browser wird dem Zertifikat nicht automatisch vertrauen. Für „grünes Schloss“ brauchst du eine lokale CA (z.B. `mkcert`) oder du importierst das Zertifikat manuell.
 
-### 4) Container bauen & starten
+### 4) Container bauen & starten (Recreate)
 
-Für lokal nutzt du Base-Compose + Local-Override:
+Wenn du wirklich „sauber neu“ starten willst (inkl. Entfernen der Volumes/DB-Daten), nutze diesen Flow:
 
 ```bash
+docker compose down -v
 docker compose -f compose.yml -f compose.local.yml up -d --build
 ```
 
-### 5) Im Browser öffnen
+> Hinweis: `down -v` löscht **Volumes** (z.B. Postgres-Daten). Verwende das nur, wenn du das wirklich möchtest.
+
+### 5) Admin-User anlegen
+
+Lege danach (einmalig) einen Admin-User an:
+
+```bash
+docker compose exec videoplayer flask create-user admin --admin
+```
+
+### 6) Container neu starten
+
+Damit alles sauber neu lädt:
+
+```bash
+docker compose restart
+```
+
+### 7) Im Browser öffnen
 
 - https://localhost/
 
