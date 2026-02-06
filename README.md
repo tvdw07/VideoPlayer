@@ -193,10 +193,10 @@ Die Erkennung ist auf Serien-/Episodenmuster ausgelegt (z.B. `S01E001`).
 
 ## Roadmap (Auswahl)
 
-- ⏯️ Wiedergabefortschritt in der DB speichern (wie weit wurde geschaut)
 - ✅ 🛡️ Erweiterte Brute-Force-Protection mit DB-Unterstuetzung (umgesetzt)
 - ✅ 🔜 Media-Serving via Nginx (z.B. `X-Accel-Redirect`) statt `send_file` in Flask (umgesetzt)
-- 🧑‍💼 Admin-Dashboard fuer mehrere Nutzer
+- ✅ ‍💼 Admin-Dashboard fuer mehrere Nutzer (umgesetzt)
+- ⏯️ Wiedergabefortschritt in der DB speichern (wie weit wurde geschaut)
 - 🧾 Erweitertes Logging
 - 🧠 Bessere Lesbarkeit durch mehr Kommentare
 - 🧪 Mehr Tests
