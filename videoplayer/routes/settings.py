@@ -27,13 +27,22 @@ def index():
     total_bytes = cached["bytes"] if cached else None
     cached_at = format_cached_timestamp(cached["updated_at"]) if cached else None
 
+    try:
+        cleanup_enabled = get_cleanup_empty_directories()
+        default_per_page = get_default_per_page()
+    except RuntimeError as exc:
+        flash("Can not load cleanup_enabled and default_per_page", "danger")
+        flash("Therefore, using default values for the settings form. You can try to reload this page.", "warning")
+        cleanup_enabled = False
+        default_per_page = 12
+
     return render_template(
         "settings.html",
         total_bytes=total_bytes,
         total_formatted=format_size(total_bytes) if total_bytes is not None else None,
         cached_at=cached_at,
-        cleanup_enabled=get_cleanup_empty_directories(),
-        default_per_page=get_default_per_page(),
+        cleanup_enabled=cleanup_enabled,
+        default_per_page=default_per_page,
     )
 
 
