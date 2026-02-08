@@ -2,9 +2,6 @@
 
 **VideoPlayer** ist eine schlanke Flask-Web-App zum Abspielen **lokaler Video-Dateien** direkt im Browser. Sie richtet sich an typische Serien-/Anime-Ordnerstrukturen (Staffeln/Episoden) und wird **via Docker Compose mit PostgreSQL, Redis und Nginx (Reverse Proxy)** betrieben.
 
-> ⚠️ **Work in progress:** Die App ist nutzbar, aber UI/Features sind noch im Ausbau und können sich ändern.
-> Feedback, Issues und Pull Requests sind sehr willkommen.
-
 ---
 
 ## Features (aktuell)
