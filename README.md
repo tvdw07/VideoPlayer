@@ -1,218 +1,220 @@
 # VideoPlayer
 
-**VideoPlayer** ist eine schlanke Flask-Web-App zum Abspielen **lokaler Video-Dateien** direkt im Browser. Sie richtet sich an typische Serien-/Anime-Ordnerstrukturen (Staffeln/Episoden) und wird **via Docker Compose mit PostgreSQL, Redis und Nginx (Reverse Proxy)** betrieben.
+**VideoPlayer** is a lightweight Flask web app for playing **local video files** directly in the browser. It is designed for typical series/anime folder structures (seasons/episodes) and is operated **via Docker Compose with PostgreSQL, Redis, and Nginx (reverse proxy)**.
 
 ---
 
-## Features (aktuell)
+## Features (current)
 
-- 📚 **Bibliothek/Browse**: Medien unter `media/` durchsuchen (inkl. Pagination)
-- 🔎 **Suche**: Titel- und Dateinamen-Suche
-- 🎬 **Watch-Seite**: Wiedergabe im Browser (Frontend via Video.js)
-- 👤 **Authentifizierung**: Login-geschützte Nutzung
-- 🛡️ **Brute-Force-Protection**: Account-Lockout nach zu vielen Login-Versuchen (DB-Felder)
-- 🗄️ **Datenbank**: Persistenz für App-Daten
-- ⏱️ **Rate Limiting**: via Flask-Limiter + Redis-Backend
-- 🧩 **Modularer Aufbau**: Blueprints, Utils und Config getrennt
-- 🐳 **Docker-ready**: Start über Compose (Basis + lokale/Prod Overrides)
-- 🔐 **HTTPS (auch lokal)**: via Nginx Reverse Proxy
+- 📚 **Library/Browse**: Browse media under `media/` (including pagination)
+- 🔎 **Search**: Title and file name search
+- 🎬 **Watch page**: Playback in browser (frontend via Video.js)
+- 👤 **Authentication**: Login-protected use
+- 🛡️ **Brute-force protection**: Account lockout after too many login attempts (DB fields)
+- 🗄️ **Database**: Persistence for app data
+- ⏱️ **Rate limiting**: via Flask limiter + Redis backend
+- 🧩 **Modular structure**: Blueprints, utils, and config separated
+- 🐳 **Docker-ready**: Start via Compose (base + local/prod overrides)
+- 🔐 **HTTPS (also local)**: via Nginx reverse proxy
 
-**Hinweis:** Es findet **kein Transcoding** statt („Direct Play“). Ob ein Video abspielbar ist, hängt von den Codecs deines Browsers ab.
+
+**Note:** There is **no transcoding** ("direct play"). Whether a video can be played depends on your browser's codecs.
+
 
 ---
 
 ## Quickstart (Docker Compose, lokal via HTTPS)
 
-**Voraussetzungen:** Docker + Docker Compose
+**Requirements:** Docker + Docker Compose
 
-### 1) Repository klonen
+### 1) Clone repository
 
 ```bash
 git clone https://github.com/tvdw07/VideoPlayer.git
 cd VideoPlayer
 ```
 
-### 2) `.env` anlegen
+### 2) Create `.env`
 
-Am einfachsten kopierst du die Beispieldatei:
+The easiest way is to copy the sample file:
 
 ```bash
 cp .env.example .env
 ```
 
-Passe mindestens `SECRET_KEY` und die Datenbank-Credentials an.
+At least adjust `SECRET_KEY` and the database credentials.
 
-> Konfiguration erfolgt über die Compose-Dateien und `.env`. Genauere Dokumentation folgt; in `.env.example` sind die Variablen bereits recht ausführlich kommentiert.
+> Configuration is done via the Compose files and `.env`. More detailed documentation will follow; the variables are already commented on in detail in `.env.example`.
 
-### 3) Lokale TLS-Zertifikate erstellen
+### 3) Create local TLS certificates
 
-Für den lokalen Nginx-Proxy erwartet das Setup Zertifikate unter:
+For the local Nginx proxy, the setup expects certificates to be located at:
 
 - `certs/local/fullchain.pem`
 - `certs/local/privkey.key`
 
-Erstelle den Ordner:
+Create the folder:
 
 ```bash
 mkdir -p certs/local
 ```
 
-Dann kannst du dir ein selbstsigniertes Zertifikat generieren (OpenSSL):
+Then you can generate a self-signed certificate (OpenSSL):
 
 ```bash
-# im Projekt-Root ausführen
+# execute in the project root
 openssl req -x509 -nodes -newkey rsa:2048 -days 365 \
   -keyout certs/local/privkey.key \
   -out certs/local/fullchain.pem \
   -subj "/CN=localhost"
 ```
 
-**Wichtig:** Dein Browser wird dem Zertifikat nicht automatisch vertrauen. Für „grünes Schloss“ brauchst du eine lokale CA (z.B. `mkcert`) oder du importierst das Zertifikat manuell.
+**Important:** Your browser will not automatically trust the certificate. For the "green lock," you need a local CA (e.g., `mkcert`) or you can import the certificate manually.
 
-### 4) Container bauen & starten (Recreate)
+### 4) Build & start container (recreate)
 
-Wenn du wirklich „sauber neu“ starten willst (inkl. Entfernen der Volumes/DB-Daten), nutze diesen Flow:
+If you really want to start from scratch (including removing volumes/DB data), use this flow:
 
 ```bash
 docker compose down -v
 docker compose -f compose.yml -f compose.local.yml up -d --build
 ```
 
-> Hinweis: `down -v` löscht **Volumes** (z.B. Postgres-Daten). Verwende das nur, wenn du das wirklich möchtest.
+> Note: `down -v` deletes **volumes** (e.g., Postgres data). Only use this if you really want to.
 
-### 5) Admin-User anlegen
+### 5) Create admin user
 
-Lege danach (einmalig) einen Admin-User an:
+Then create an admin user (once):
 
 ```bash
 docker compose exec videoplayer flask create-user admin --admin
 ```
 
-### 6) Container neu starten
+### 6) Restart container
 
-Damit alles sauber neu lädt:
+To ensure everything reloads properly:
 
 ```bash
 docker compose -f compose.yml -f compose.local.yml restart
 ```
 
-### 7) Im Browser öffnen
+### 7) Open in browser
 
 - https://localhost/
 
-(HTTP auf Port 80 wird auf HTTPS umgeleitet.)
+(HTTP on port 80 is redirected to HTTPS.)
 
-**Medien hinzufügen:** Lege deine Dateien/Ordner unter `media/` ab (wird in den Container gemountet).
+**Add media:** Place your files/folders under `media/` (will be mounted in the container).
 
 ---
 
-## Production (Hinweis)
+## Production (Note)
 
-Für eine produktive Umgebung gibt es ein separates Override:
+There is a separate override for a productive environment:
 
 ```bash
 docker compose -f compose.yml -f compose.prod.yml up -d --build
 ```
 
-Das Prod-Setup erwartet Zertifikate unter:
+The prod setup expects certificates under:
 
 - `certs/prod/fullchain.pem`
 - `certs/prod/privkey.key`
 ---
 
-## Systemanforderungen
+## System requirements
 
-Die App wird via Docker betrieben. Folgende Komponenten werden benötigt:
+The app is run via Docker. The following components are required:
 
-- **Docker** (Version 20.10+)
+- **Docker** (version 20.10+)
 - **Docker Compose**
-- Mindestens **512 MB freier RAM** (empfohlen: 1 GB+)
+- At least **512 MB of free RAM** (recommended: 1 GB+)
 
 ---
 
-## Konfiguration
+## Configuration
 
-- Zentrale Umgebungsvariablen: `.env` (Vorlage: `.env.example`)
-- Compose-Files:
-  - `compose.yml` (Basis: App + Postgres + Redis)
-  - `compose.local.yml` (lokal: Nginx + Mounts für `nginx/local.conf` und `certs/local`)
-  - `compose.prod.yml` (prod: Nginx + Mounts für `nginx/prod.conf` und `certs/prod`)
+- Central environment variables: `.env` (template: `.env.example`)
+- Compose files:
+  - `compose.yml` (base: app + Postgres + Redis)
+  - `compose.local.yml` (local: Nginx + mounts for `nginx/local.conf` and `certs/local`)
+- `compose.prod.yml` (prod: Nginx + mounts for `nginx/prod.conf` and `certs/prod`)
 
-**Wichtige Variablen (Auszug):**
+**Important variables (excerpt):**
 
-- `SECRET_KEY` – Session/CSRF-Schutz (**required**)
-- `DATABASE_URL` – SQLAlchemy-URI (zeigt im Docker-Setup auf Service `postgres`)
-- `RATELIMIT_STORAGE_URI` – Redis-URI (im Docker-Setup i.d.R. `redis://redis:6379/0`)
-- `AUTH_ENABLED` – Auth Master-Switch (**muss** in Prod `TRUE` sein; App verweigert sonst den Start)
-- Cookie Settings für HTTPS:
-  - `SESSION_COOKIE_SECURE=TRUE`
-  - `REMEMBER_COOKIE_SECURE=TRUE`
+- `SECRET_KEY` – Session/CSRF protection (**required**)
+- `DATABASE_URL` – SQLAlchemy URI (points to service `postgres` in Docker setup)
+- `RATELIMIT_STORAGE_URI` – Redis URI (usually `redis://redis:6379/0` in the Docker setup)
+- `AUTH_ENABLED` – Auth master switch (**must** be `TRUE` in prod; otherwise, the app will refuse to start)
+- Cookie settings for HTTPS:
+- `SESSION_COOKIE_SECURE=TRUE`
+- `REMEMBER_COOKIE_SECURE=TRUE`
 
-> Hinweis: Die README nennt bewusst nur die wichtigsten Punkte – die aktuelle, ausführlichste Doku ist die `.env.example`.
+> Note: The README deliberately only mentions the most important points – the current, most detailed documentation is the `.env.example`.
+---
+
+## Media Structure
+
+The app expects media to be located under `MEDIA_ROOT` (default `media/`). Typical structure:
+
+- `media/anime/<title>/…S01E001….mp4`
+- `media/series/<title>/Season 01/…`
+- `media/movies/<title>.mp4`
+
+Recognition is designed for series/episode patterns (e.g., `S01E001`).
 
 ---
 
-## Medien-Struktur
-
-Die App erwartet Medien unterhalb von `MEDIA_ROOT` (standardmäßig `media/`). Typische Struktur:
-
-- `media/anime/<Titel>/…S01E001….mp4`
-- `media/series/<Titel>/Season 01/…`
-- `media/movies/<Titel>.mp4`
-
-Die Erkennung ist auf Serien-/Episodenmuster ausgelegt (z.B. `S01E001`).
-
----
-
-## Projektstruktur (kurz)
+## Project structure (brief)
 
 - `videoplayer/` – App-Code (App-Factory, Config, Utils)
 - `videoplayer/routes/` – Blueprints/Routes (`browse`, `watch`, `media`, `settings`)
 - `templates/` – Jinja2 Templates
 - `static/` – CSS/JS (u.a. `static/js/player.js`)
 - `nginx/` – Nginx Reverse Proxy Configs (`local.conf`, `prod.conf`)
-- `certs/` – TLS-Zertifikate für Nginx (`local/` und `prod/`)
-- `media/` – lokale Medienbibliothek (wird nicht versioniert gedacht)
-- `instance/` – Laufzeitdaten (z.B. Cache-Dateien)
+- `certs/` – TLS certificates for Nginx (`local/` and `prod/`)
+- `media/` – local media library (not intended to be versioned)
+- `instance/` – Runtime data (e.g., cache files)
 - `tests/` – Tests
 
 ---
 
-## Security / Betriebshinweise
+## Security / Operating Instructions
 
-- 🔒 **Primär fürs Heimnetz gedacht:** Die App wird security-seitig laufend verbessert, um langfristig auch öffentliche Nutzung zu ermöglichen. Trotzdem: bitte nicht „einfach so“ ohne zusätzliche Maßnahmen ins Internet hängen.
-- 🔐 **HTTPS via Nginx:** Compose-Setups laufen standardmäßig über HTTPS (auch lokal). Zertifikate müssen vorhanden sein (siehe oben).
-- 🧷 **`SECRET_KEY` setzen:** erforderlich für sichere Sessions/CSRF.
-- 🧭 **Pfadvalidierung:** Routen dürfen nur innerhalb von `MEDIA_ROOT` auf echte Dateien zugreifen (Schutz vor Directory Traversal).
-- ⏱️ **Rate Limiting:** Flask-Limiter nutzt Redis und hilft gegen Missbrauch.
+- 🔒 **Primarily intended for home networks:** The app is constantly being improved in terms of security to enable public use in the long term. Nevertheless, please do not connect to the internet "just like that" without taking additional measures.
+- 🔐 **HTTPS via Nginx:** Compose setups run over HTTPS by default (even locally). Certificates must be available (see above).
+- 🧷 **Set `SECRET_KEY`:** required for secure sessions/CSRF.
+- 🧭 **Path validation:** Routes may only access real files within `MEDIA_ROOT` (protection against directory traversal).
+- ⏱️ **Rate limiting:** Flask-Limiter uses Redis and helps prevent abuse.
 
 ---
 
-## Roadmap (Auswahl)
+## Roadmap (selection)
 
-- ✅ 🛡️ Erweiterte Brute-Force-Protection mit DB-Unterstuetzung (umgesetzt)
-- ✅ 🔜 Media-Serving via Nginx (z.B. `X-Accel-Redirect`) statt `send_file` in Flask (umgesetzt)
-- ✅ ‍💼 Admin-Dashboard fuer mehrere Nutzer (umgesetzt)
-- ⏯️ Wiedergabefortschritt in der DB speichern (wie weit wurde geschaut)
-- 🧾 Erweitertes Logging
-- 🧠 Bessere Lesbarkeit durch mehr Kommentare
-- 🧪 Mehr Tests
-- ⚙️ Erweiterte Einstellungen
-- 🎨 Design-Update (optional)
-- ⬆️ Optional: Uploads auf den Server erlauben
+- ✅ 🛡️ Enhanced brute force protection with DB support (implemented)
+- ✅ 🔜 Media serving via Nginx (e.g., `X-Accel-Redirect`) instead of `send_file` in Flask (implemented)
+- ✅ ‍💼 Admin dashboard for multiple users (implemented)
+- ⏯️ Save playback progress in the DB (how far has been watched)
+- 🧾 Extended logging
+- 🧠 Improved readability through more comments
+- 🧪 More tests
+- ⚙️ Extended settings
+- 🎨 Design update (optional)
+- ⬆️ Optional: Allow uploads to the server
 
 ---
 
 ## Contributing
 
-Beiträge sind willkommen 😊
+Contributions are welcome 😊
 
-- **Bugs/Ideen:** bitte als GitHub Issue mit Repro-Schritten
-- **Pull Requests:** gerne klein und fokussiert (mit kurzer Beschreibung)
-- **Tests:** falls möglich, passende Tests ergänzen/aktualisieren
+- **Bugs/ideas:** please submit as a GitHub issue with reproduction steps
+- **Pull requests:** preferably small and focused (with a short description)
+- **Tests:** if possible, add/update appropriate tests
+
 
 ---
 
-## Rechtlicher Hinweis
+## Legal notice
 
-Bitte verwende nur Medien, an denen du die nötigen Rechte hast. Dieses Projekt stellt lediglich eine lokale Abspieloberfläche bereit.
+Please only use media for which you have the necessary rights. This project only provides a local playback interface.
