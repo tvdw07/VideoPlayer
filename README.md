@@ -96,7 +96,7 @@ docker compose exec videoplayer flask create-user admin --admin
 Damit alles sauber neu lädt:
 
 ```bash
-docker compose restart
+docker compose -f compose.yml -f compose.local.yml restart
 ```
 
 ### 7) Im Browser öffnen
